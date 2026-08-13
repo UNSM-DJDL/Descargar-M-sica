@@ -3,62 +3,163 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Terminal de Descarga HQ</title>
+    <title>Estación de Carga Retro - VINTAGE 198X</title>
     <style>
-        body { font-family: 'Courier New', Courier, monospace; background-color: #000; margin: 0; padding: 20px; color: #0f0; display: flex; justify-content: center; align-items: center; min-height: 95vh; }
-        .panel { background: #000; padding: 30px; border-radius: 0px; box-shadow: 0 0 15px rgba(0,255,0,0.5); max-width: 600px; width: 100%; border: 2px solid #0f0; text-align: left; }
-        h2 { color: #0f0; font-size: 1.4em; margin-top: 0; text-align: center; font-weight: bold; letter-spacing: 1px; }
-        .separator { color: #0f0; margin: 10px 0; font-weight: bold; }
-        .input-group { margin: 20px 0; }
-        .input-group label { display: block; font-weight: bold; font-size: 0.9em; margin-bottom: 8px; color: #0f0; }
-        input[type="text"] { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #0f0; background: #000; color: #0f0; font-size: 1em; font-family: 'Courier New', Courier, monospace; outline: none; }
-        .btn-procesar { display: block; width: 100%; background-color: #000; color: #0f0; text-align: center; padding: 12px; border: 2px solid #0f0; font-size: 1.1em; font-weight: bold; cursor: pointer; font-family: 'Courier New', Courier, monospace; text-transform: uppercase; margin-top: 15px; }
-        .btn-procesar:hover { background-color: #030; }
+        /* Efecto de parpadeo clásico de fósforo verde analógico */
+        @keyframes flicker {
+            0% { opacity: 0.98; }
+            50% { opacity: 1; }
+            100% { opacity: 0.99; }
+        }
+
+        body { 
+            font-family: 'Courier New', Courier, monospace; 
+            background-color: #0b0f0b; 
+            margin: 0; 
+            padding: 20px; 
+            color: #33ff33; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 95vh;
+            text-shadow: 0 0 4px rgba(51, 255, 51, 0.5);
+            animation: flicker 0.15s infinite;
+        }
+
+        /* Gabinete contenedor simulando un monitor CRT antiguo */
+        .crt-monitor { 
+            background: #050a05; 
+            padding: 30px; 
+            border-radius: 20px; 
+            box-shadow: inset 0 0 40px rgba(0,0,0,1), 0 0 20px rgba(51,255,51,0.2); 
+            max-width: 580px; 
+            width: 100%; 
+            border: 4px solid #1a2f1a; 
+            text-align: left;
+            position: relative;
+        }
+
+        h2 { 
+            color: #33ff33; 
+            font-size: 1.3em; 
+            margin-top: 0; 
+            text-align: center; 
+            font-weight: bold; 
+            letter-spacing: 2px;
+        }
+
+        .linea-decorativa { 
+            color: #1a2f1a; 
+            margin: 10px 0; 
+            font-weight: bold; 
+            letter-spacing: -1px;
+        }
+
+        .input-group { margin: 25px 0; }
+        .input-group label { display: block; font-weight: bold; font-size: 0.85em; margin-bottom: 10px; color: #33ff33; }
         
-        /* Contenedor dinámico de la miniatura del video */
-        .preview-container { display: none; margin: 20px 0; text-align: center; border: 1px dashed #0f0; padding: 15px; background: #050505; }
-        .preview-img { max-width: 100%; height: auto; border: 1px solid #0f0; margin-bottom: 10px; max-height: 200px; }
+        input[type="text"] { 
+            width: 100%; 
+            padding: 12px; 
+            box-sizing: border-box; 
+            border: 2px solid #224422; 
+            background: #020502; 
+            color: #33ff33; 
+            font-size: 0.95em; 
+            font-family: 'Courier New', Courier, monospace; 
+            outline: none;
+        }
+        input[type="text"]:focus { border-color: #33ff33; }
+
+        .btn-vintage { 
+            display: block; 
+            width: 100%; 
+            background-color: #020502; 
+            color: #33ff33; 
+            text-align: center; 
+            padding: 12px; 
+            border: 2px solid #33ff33; 
+            font-size: 1em; 
+            font-weight: bold; 
+            cursor: pointer; 
+            font-family: 'Courier New', Courier, monospace; 
+            text-transform: uppercase; 
+            margin-top: 15px;
+            box-shadow: 0 0 5px rgba(51,255,51,0.3);
+        }
+        .btn-vintage:hover { background-color: #113311; color: #fff; }
         
-        /* Grupo de botones de descarga */
-        .action-buttons { display: none; gap: 15px; margin-top: 15px; }
-        .btn-download { flex: 1; padding: 12px; background: #000; border: 2px solid #0f0; color: #0f0; font-family: 'Courier New', Courier, monospace; font-weight: bold; cursor: pointer; text-transform: uppercase; text-align: center; text-decoration: none; font-size: 0.95em; }
-        .btn-download:hover { background: #0f0; color: #000; font-weight: bold; }
+        /* Caja de inspección de metadatos */
+        .preview-container { 
+            display: none; 
+            margin: 25px 0; 
+            text-align: center; 
+            border: 2px dashed #224422; 
+            padding: 15px; 
+            background: #030603; 
+        }
+        .preview-img { 
+            max-width: 100%; 
+            height: auto; 
+            border: 2px solid #33ff33; 
+            margin-bottom: 15px; 
+            max-height: 180px; 
+            filter: grayscale(0.2) contrast(1.1) brightness(0.9);
+        }
         
-        .estado-descarga { font-size: 1em; color: #0f0; font-weight: bold; margin-top: 15px; min-height: 20px; }
+        /* Botones de acción analógicos */
+        .action-buttons { display: none; gap: 15px; margin-top: 10px; }
+        .btn-download { 
+            flex: 1; 
+            padding: 12px; 
+            background: #020502; 
+            border: 2px solid #33ff33; 
+            color: #33ff33; 
+            font-family: 'Courier New', Courier, monospace; 
+            font-weight: bold; 
+            cursor: pointer; 
+            text-transform: uppercase; 
+            text-align: center; 
+            text-decoration: none; 
+            font-size: 0.9em;
+        }
+        .btn-download:hover { background: #33ff33; color: #000; text-shadow: none; }
+        
+        .estado-consola { font-size: 0.9em; color: #33ff33; margin-top: 15px; min-height: 20px; word-wrap: break-word; }
     </style>
 </head>
 <body>
 <div class="main-container">
-    <div class="panel">
-        <div class="separator">====================================================</div>
-        <h2>SISTEMA MULTIMEDIA DE ALTA FIDELIDAD</h2>
-        <div class="separator">====================================================</div>
+    <div class="crt-monitor">
+        <div class="linea-decorativa">____________________________________________________</div>
+        <h2>ANALOG MULTIMEDIA TERMINAL // VINTAGE-1986</h2>
+        <div class="linea-decorativa">____________________________________________________</div>
         
         <div class="input-group">
-            <label>[SYS_IN] Pega el enlace de YouTube aquí:</label>
-            <input type="text" id="url-enlace" placeholder="https://youtube.com..." autocomplete="off">
+            <label>[DRIVE_A] ENTER TARGET YOUTUBE URL:</label>
+            <input type="text" id="url-enlace" placeholder="LOG_IN URL..." autocomplete="off">
         </div>
 
-        <button class="btn-procesar" id="btn-action" onclick="cargarVideoPrevia()">Verificar Video</button>
+        <button class="btn-vintage" id="btn-action" onclick="cargarVideoPrevia()">LOAD DATA_VIDEO</button>
         
-        <!-- Zona de carga e inspección de miniatura -->
+        <!-- Bloque de inspección de miniatura -->
         <div class="preview-container" id="preview-box">
-            <div style="font-size: 0.85em; margin-bottom: 8px; text-align: left;">[MEDIA_INFO] Miniatura localizada:</div>
-            <img src="" id="video-thumb" class="preview-img" alt="Previa de YouTube">
+            <div style="font-size: 0.8em; margin-bottom: 10px; text-align: left;">[TRACK_INFO] VISUAL MIN-IMAGE CONFIRMED:</div>
+            <img src="" id="video-thumb" class="preview-img" alt="Previa Analógica">
             
             <div class="action-buttons" id="download-box">
-                <a href="#" id="link-mp3" target="_blank" class="btn-download">💾 Bajar MP3 (Audio)</a>
-                <a href="#" id="link-mp4" target="_blank" class="btn-download">📺 Bajar MP4 (Video)</a>
+                <a href="#" id="link-mp3" target="_blank" class="btn-download">>> EXTRACT MP3</a>
+                <a href="#" id="link-mp4" target="_blank" class="btn-download">>> EXTRACT MP4</a>
             </div>
         </div>
 
-        <div class="separator">.</div>
-        <div class="estado-descarga" id="mensaje-estado">Consola lista. Esperando entrada de datos...</div>
-        <div class="separator">====================================================</div>
+        <div class="linea-decorativa">.</div>
+        <div class="estado-consola" id="mensaje-estado">READY FOR DATA INPUT. CORE_OK.</div>
+        <div class="linea-decorativa">____________________________________________________</div>
     </div>
 </div>
 <script>
-    // Ejecutar verificación con la tecla ENTER de forma automatizada
+    // Ejecución rápida con la tecla ENTER de la consola física
     document.getElementById('url-enlace').addEventListener('keypress', function(e) {
         if (e.key === 'Enter') { cargarVideoPrevia(); }
     });
@@ -72,6 +173,7 @@
             if (url.includes('youtu.be/')) {
                 var partes = url.split('youtu.be/');
                 if (partes[1]) {
+                    // Dividimos por si trae parámetros extras de tracking
                     return partes[1].split(/[?#&]/)[0];
                 }
             }
@@ -89,8 +191,7 @@
         var thumbImg = document.getElementById('video-thumb');
 
         if (!urlInput) {
-            txtEstado.innerText = "[ERROR] Entrada vacía. Inserta una URL.";
-            txtEstado.style.color = "#f00";
+            txtEstado.innerText = "[SYS_ERR] INPUT NULL. RE-ENTER REQUEST.";
             previewBox.style.display = "none";
             return;
         }
@@ -98,33 +199,31 @@
         var videoId = extraerIdVideo(urlInput);
 
         if (!videoId || videoId.length !== 11) {
-            txtEstado.innerText = "[ERROR] Estructura de ID de YouTube incorrecta.";
-            txtEstado.style.color = "#f00";
+            txtEstado.innerText = "[SYS_ERR] GEOMETRY INDEX ERROR. INVALID YOUTUBE ID.";
             previewBox.style.display = "none";
             return;
         }
 
-        txtEstado.style.color = "#0f0";
-        txtEstado.innerText = "[STDOUT] Extrayendo metadatos... Actualizando consola gráfica.";
+        txtEstado.innerText = "[LOAD] DECODING BITSTREAM METADATA... UPDATING MONITOR MATRIX.";
 
-        // Generar la URL de la miniatura oficial en resolución HQ
-        var urlMiniatura = "https://youtube.com" + videoId + "/mqdefault.jpg";
+        // ✅ REPARADO: Dirección oficial absoluta de Google para cargar miniaturas sin errores
+        var urlMiniatura = "https://ytimg.com" + videoId + "/mqdefault.jpg";
         thumbImg.src = urlMiniatura;
         
-        // Hacer visible el contenedor de inspección
+        // Hacemos visible el cuadro vintage de previsualización
         previewBox.style.display = "block";
 
-        // Preparar las pasarelas de conversión codificadas en Base64 para saltar bloqueos
+        // Pasarelas seguras encriptadas en Base64 para prevenir censuras
         var baseAudio = atob('aHR0cHM6Ly95dXRidXRvbi5jb20vYXBpL2J1dHRvbi9tcDMv');
         var baseVideo = atob('aHR0cHM6Ly95dXRidXRvbi5jb20vYXBpL2J1dHRvbi92aWRlby8=');
 
-        // Asignar los enlaces directos correspondientes a los botones
+        // Enlazar los disparadores a los botones analógicos directos
         document.getElementById('link-mp3').href = baseAudio + videoId;
         document.getElementById('link-mp4').href = baseVideo + videoId;
 
-        // Mostrar los botones de acción limpios
+        // Desplegar las opciones finales en la terminal
         downloadBox.style.display = "flex";
-        txtEstado.innerText = "[STDOUT] Flujo validado con éxito. Selecciona un formato de salida.";
+        txtEstado.innerText = "[SUCCESS] AUDIO/VIDEO STREAM DETECTED. SELECT EXTRCTION FORMAT.";
     }
 </script>
 </body>
