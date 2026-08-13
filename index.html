@@ -37,7 +37,6 @@
         <div class="separator" id="sep-final">====================================================</div>
     </div>
 </div>
-
 <script>
     // Permitir activar la descarga presionando la tecla ENTER en el teclado
     document.getElementById('url-enlace').addEventListener('keypress', function(e) {
@@ -47,10 +46,23 @@
     });
 
     function extraerIdVideo(url) {
-        // Expresión regular mejorada para aislar el ID omitiendo listas de reproducción adicionales o parámetros extras
-        var regExp = /^.*(?:youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]{11}).*/;
-        var match = url.match(regExp);
-        return (match && match[1].length === 11) ? match[1] : null;
+        try {
+            // Método nativo que limpia y extrae el parámetro 'v' sin importar los agregados extras
+            if (url.includes('watch?v=')) {
+                var urlObj = new URL(url);
+                return urlObj.searchParams.get('v');
+            }
+            // Soporte para enlaces cortos de celular (youtu.be/ID)
+            if (url.includes('youtu.be/')) {
+                var partes = url.split('youtu.be/');
+                if (partes[1]) {
+                    return partes[1].split(/[?#&]/)[0];
+                }
+            }
+            return null;
+        } catch (e) {
+            return null;
+        }
     }
 
     function procesarDescargaHQ() {
@@ -66,39 +78,40 @@
 
         var videoId = extraerIdVideo(urlInput);
 
-        if (!videoId) {
+        // Validación estricta del tamaño del ID de YouTube (siempre son 11 caracteres)
+        if (!videoId || videoId.length !== 11) {
             txtEstado.innerText = "Error: Enlace de YouTube incorrecto.";
             txtEstado.style.color = "#ff0000";
             return;
         }
 
-        // Configuración y aviso de descarga simulando la consola
+        // Aviso en pantalla estilo consola
         txtEstado.style.color = "#0f0";
-        txtEstado.innerText = "[STDOUT] Conectando con el convertidor... Extraiendo pista original.";
+        txtEstado.innerText = "[STDOUT] ID detectado correctamente. Solicitando MP3 HQ al servidor...";
         botonAction.disabled = true;
         botonAction.innerText = "PROCESANDO...";
 
-        // Cifrado Base64 seguro para evitar que el chat corrompa la URL del servidor
+        // Cifrado Base64 del servidor de conversión estable
         var servidorSeguro = atob('aHR0cHM6Ly95dXRidXRvbi5jb20vYXBpL2J1dHRvbi9tcDMv');
         var enlaceFinal = servidorSeguro + videoId;
 
         try {
-            // Disparador asíncrono invisible en el cliente web
+            // Disparador de descarga en segundo plano
             var descargadorOculto = document.createElement('iframe');
             descargadorOculto.style.display = 'none';
             descargadorOculto.src = enlaceFinal;
             document.body.appendChild(descargadorOculto);
 
             setTimeout(function() {
-                txtEstado.innerText = "[STDOUT] ¡PROCESO COMPLETADO! Archivo MP3 HQ enviado.";
+                txtEstado.innerText = "[STDOUT] ¡PROCESO COMPLETADO! Descarga enviada con éxito.";
                 botonAction.disabled = false;
                 botonAction.innerText = "Descargar Canción";
                 
                 setTimeout(function() {
                     txtEstado.innerText = "Listo para recibir enlace de consola...";
                     document.getElementById('url-enlace').value = "";
-                }, 5000);
-            }, 4000);
+                }, 4000);
+            }, 3000);
 
         } catch (error) {
             console.error(error);
@@ -111,3 +124,4 @@
 </script>
 </body>
 </html>
+
