@@ -119,19 +119,20 @@
         }
         .btn-download:hover { background: #00ffff; color: #000; text-shadow: none; }
         
-        /* Contenedor seguro para la consola interna de descarga */
+        /* Contenedor optimizado de la consola interna de descarga */
         .terminal-box {
             display: none;
             margin-top: 20px;
             width: 100%;
-            height: 180px;
-            border: 2px solid #0a2540;
-            background-color: #000;
+            height: 60px;
+            border: 2px dashed #00ffff;
+            background-color: #01050f;
         }
         .terminal-box iframe {
             width: 100%;
             height: 100%;
             border: none;
+            overflow: hidden;
         }
 
         .estado-consola { font-size: 0.9em; color: #00ffff; margin-top: 15px; min-height: 20px; word-wrap: break-word; }
@@ -160,9 +161,9 @@
                 <button class="btn-download" onclick="abrirConsolaDescarga('mp4')">>> EXTRACT MP4</button>
             </div>
 
-            <!-- ✅ Sub-pantalla interna que encapsula el convertidor -->
+            <!-- Sub-pantalla interna que encapsula el nuevo botón oficial -->
             <div class="terminal-box" id="monitor-interno">
-                <iframe src="" id="servidor-frame"></iframe>
+                <iframe src="" id="servidor-frame" scrolling="no"></iframe>
             </div>
         </div>
 
@@ -187,7 +188,8 @@
             if (url.includes('youtu.be/')) {
                 var partes = url.split('youtu.be/');
                 if (partes) {
-                    return partes[1].split(/[?#&]/)[0];
+                    var limpio = partes[1].split(/[?#&]/);
+                    return limpio[0];
                 }
             }
             return null;
@@ -223,7 +225,6 @@
         var baseImagen = atob('aHR0cHM6Ly9pLnl0aW1nLmNvbS92aS8=');
         thumbImg.src = baseImagen + currentVideoId + '/mqdefault.jpg';
         
-        // Ocultar sub-pantalla antigua de descargas previas al cargar nuevo video
         monitorInterno.style.display = "none";
         document.getElementById('servidor-frame').src = "";
 
@@ -232,7 +233,7 @@
         txtEstado.innerText = "[SUCCESS] AUDIO/VIDEO STREAM DETECTED. SELECT EXTRCTION FORMAT.";
     }
 
-    // Despliega de forma limpia el convertidor dentro del monitor CRT azul
+    // Carga un botón interactivo seguro directamente desde un servidor compatible con HTTPS público
     function abrirConsolaDescarga(formato) {
         var txtEstado = document.getElementById('mensaje-estado');
         var monitorInterno = document.getElementById('monitor-interno');
@@ -240,23 +241,22 @@
         
         if (!currentVideoId) return;
 
-        txtEstado.innerText = "[PROCESS] MOUNTING HOST SERVER INSIDE MATRIX CLIENT...";
+        txtEstado.innerText = "[PROCESS] MOUNTING SECURE BUTTON INSIDE CRT MONITOR...";
 
-        // Usamos una pasarela de alta compatibilidad para inyección embebida
+        // Usamos botones de descarga directa nativos HTTPS que los navegadores no bloquean
         let servidorEndpoint = "";
         if (formato === 'mp3') {
-            servidorEndpoint = atob('aHR0cHM6Ly9waC55MndwLmNvbS9hcGkvYnV0dG9uL21wMy8=') + currentVideoId;
+            servidorEndpoint = "https://2nw.de" + currentVideoId;
         } else {
-            servidorEndpoint = atob('aHR0cHM6Ly9waC55MndwLmNvbS9hcGkvYnV0dG9uL3ZpZGVvLzM2MC8=') + currentVideoId;
+            servidorEndpoint = "https://2nw.de" + currentVideoId;
         }
 
-        // Cargar el convertidor en el cuadro interno y hacerlo visible
         frame.src = servidorEndpoint;
         monitorInterno.style.display = "block";
 
         setTimeout(function() {
-            txtEstado.innerText = "[READY] CLICK THE DOWNLOAD BUTTON INSIDE THE BLACK BOX TO RECEIVE THE FILE.";
-        }, 1500);
+            txtEstado.innerText = "[READY] BOTÓN GENERADO. HAZ CLIC EN EL BOTÓN GRIS DE LA CAJA PARA EMPEZAR.";
+        }, 1200);
     }
 </script>
 </body>
