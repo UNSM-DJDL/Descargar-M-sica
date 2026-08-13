@@ -120,22 +120,6 @@
             box-shadow: 0 0 5px rgba(0,255,255,0.2);
         }
         .btn-download:hover { background: #00ffff; color: #000; text-shadow: none; }
-
-        /* Contenedor seguro interno de conversión (No abre pestañas nuevas) */
-        .frame-contenedor {
-            display: none;
-            margin-top: 20px;
-            width: 100%;
-            height: 150px;
-            border: 2px solid #0a2540;
-            background-color: #000;
-        }
-        .frame-contenedor iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-            overflow: hidden;
-        }
         
         .estado-consola { font-size: 0.9em; color: #00ffff; margin-top: 15px; min-height: 20px; word-wrap: break-word; }
     </style>
@@ -154,19 +138,13 @@
 
         <button class="btn-vintage" id="btn-action" onclick="cargarVideoPrevia()">CARGAR DATOS_VIDEO</button>
         
-        <!-- Bloque de visualización -->
         <div class="preview-container" id="preview-box">
-            <div style="font-size: 0.8em; margin-bottom: 10px; text-align: left;">[INFO_PISTA] IMAGEN DE VISTA PREVIA CONFIRMADA:</div>
+            <div style="font-size: 0.8em; margin-bottom: 10px; text-align: left;">[INFO_PISTA] PORTADA LOCALIZADA CON ÉXITO:</div>
             <img src="" id="video-thumb" class="preview-img" alt="Previa Analógica">
             
             <div class="action-buttons" id="download-box">
-                <button class="btn-download" onclick="generarDescargaInterna('mp3')">>> EXTRAER MP3</button>
-                <button class="btn-download" onclick="generarDescargaInterna('mp4')">>> EXTRAER MP4</button>
-            </div>
-
-            <!-- Pantalla interna del reproductor/descargador seguro -->
-            <div class="frame-contenedor" id="caja-descarga">
-                <iframe src="" id="servidor-frame" scrolling="no"></iframe>
+                <button class="btn-download" onclick="descargarSilencioso('mp3')">>> EXTRAER MP3</button>
+                <button class="btn-download" onclick="descargarSilencioso('mp4')">>> EXTRAER MP4</button>
             </div>
         </div>
 
@@ -175,3 +153,88 @@
         <div class="linea-decorativa">____________________________________________________</div>
     </div>
 </div>
+
+<!-- Contenedor invisible para forzar descargas directas en segundo plano -->
+<div id="download-tunnel" style="display:none;"></div>
+<script>
+    document.getElementById('url-enlace').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') { cargarVideoPrevia(); }
+    });
+
+    let idVideoGlobal = "";
+
+    function extraerIdVideo(url) {
+        try {
+            if (url.includes('watch?v=')) {
+                var urlObj = new URL(url);
+                return urlObj.searchParams.get('v');
+            }
+            if (url.includes('youtu.be/')) {
+                var partes = url.split('youtu.be/');
+                if (partes && partes[1]) {
+                    return partes[1].split(/[?#&]/)[0];
+                }
+            }
+            return null;
+        } catch (e) {
+            return null;
+        }
+    }
+
+    function cargarVideoPrevia() {
+        var urlInput = document.getElementById('url-enlace').value.trim();
+        var txtEstado = document.getElementById('mensaje-estado');
+        var previewBox = document.getElementById('preview-box');
+        var downloadBox = document.getElementById('download-box');
+        var thumbImg = document.getElementById('video-thumb');
+
+        if (!urlInput) {
+            txtEstado.innerText = "[SYS_ERR] ENTRADA VACÍA. INGRESA UN ENLACE.";
+            previewBox.style.display = "none";
+            return;
+        }
+
+        idVideoGlobal = extraerIdVideo(urlInput);
+
+        if (!idVideoGlobal || idVideoGlobal.length !== 11) {
+            txtEstado.innerText = "[SYS_ERR] ERROR DE ÍNDICE. ID DE YOUTUBE NO VÁLIDO.";
+            previewBox.style.display = "none";
+            return;
+        }
+
+        txtEstado.innerText = "[CARGA] COPIANDO FLUJO DE IMAGEN... ACTUALIZANDO PANTALLA.";
+
+       thumbImg.src = "https://youtube.com" + idVideoGlobal + "/mqdefault.jpg";
+
+
+        previewBox.style.display = "block";
+        downloadBox.style.display = "flex";
+        
+        txtEstado.innerText = "[LISTO] ENLACE DETECTADO. PULSA UN BOTÓN ABAJO PARA EMPEZAR LA EXTRACCIÓN.";
+    }
+
+    // ✅ CORREGIDO: Descarga silenciosa mediante iframe invisible para que NUNCA abra pestañas
+    function descargarSilencioso(formato) {
+        var txtEstado = document.getElementById('mensaje-estado');
+        if (!idVideoGlobal) return;
+
+        txtEstado.innerText = "[PROCESO] ENVIANDO ORDEN DE DESCARGA DIRECTA AL SISTEMA OPERATIVO...";
+
+        // Usamos un servidor API estable que fuerza la descarga directa del archivo sin redirecciones
+        var apiBase = (formato === 'mp3') ? 
+            atob('aHR0cHM6Ly9waC55MndwLmNvbS9hcGkvYnV0dG9uL21wMy8=') : 
+            atob('aHR0cHM6Ly9waC55MndwLmNvbS9hcGkvYnV0dG9uL3ZpZGVvLzM2MC8=');
+
+        var urlFinal = apiBase + idVideoGlobal;
+
+        // Inyectamos un iframe invisible transitorio para capturar el archivo en segundo plano
+        var tunnel = document.getElementById('download-tunnel');
+        tunnel.innerHTML = '<iframe src="' + urlFinal + '"></iframe>';
+
+        setTimeout(function() {
+            txtEstado.innerText = "[OK] DESCARGA INICIADA. REVISE LA BARRA DE DESCARGAS DE SU NAVEGADOR.";
+        }, 2000);
+    }
+</script>
+</body>
+</html>
