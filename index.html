@@ -105,7 +105,6 @@
         
         .action-buttons { display: none; gap: 15px; margin-top: 10px; }
         
-        /* Botones link directos optimizados */
         .btn-download { 
             flex: 1; 
             padding: 12px; 
@@ -140,7 +139,7 @@
 
         <button class="btn-vintage" id="btn-action" onclick="cargarVideoPrevia()">CARGAR DATOS_VIDEO</button>
         
-        <!-- Bloque de visualización e información multimedia -->
+        <!-- Bloque de visualización -->
         <div class="preview-container" id="preview-box">
             <div style="font-size: 0.8em; margin-bottom: 10px; text-align: left;">[INFO_PISTA] IMAGEN DE VISTA PREVIA CONFIRMADA:</div>
             <img src="" id="video-thumb" class="preview-img" alt="Previa Analógica">
@@ -157,7 +156,6 @@
     </div>
 </div>
 <script>
-    // Permitir ejecución con la tecla ENTER del teclado físico
     document.getElementById('url-enlace').addEventListener('keypress', function(e) {
         if (e.key === 'Enter') { cargarVideoPrevia(); }
     });
@@ -203,22 +201,20 @@
 
         txtEstado.innerText = "[CARGA] DECODIFICANDO FLUJO DE METADATOS... ACTUALIZANDO PANTALLA.";
 
-        // Enlace base seguro para cargar la imagen de portada
-        var baseImagen = atob('aHR0HM6Ly9pLnl0aW1nLmNvbS92aS8=');
-        thumbImg.src = baseImagen + videoId + '/mqdefault.jpg';
+        // Combinación de texto simple para construir la URL de la imagen sin usar atob()
+        var urlImagenFinal = "https://youtube.com" + videoId + "/mqdefault.jpg";
+        thumbImg.src = urlImagenFinal;
         
-        // Pasarelas API de conversión estables y directas (2026)
-        var apiAudio = "https://loader.to" + urlInput;
-        var apiVideo = "https://loader.to" + urlInput;
+        // Pasarela estable de conversión externa directa
+        var linkBaseMp3 = "https://youtubeinmp3.com";
+        var linkBaseMp4 = "https://loader.to";
 
-        // Inyectamos las rutas de los servidores directo en los enlaces de los botones
-        document.getElementById('link-mp3').href = apiAudio;
-        document.getElementById('link-mp4').href = apiVideo;
+        document.getElementById('link-mp3').href = linkBaseMp3 + encodeURIComponent(urlInput);
+        document.getElementById('link-mp4').href = linkBaseMp4 + encodeURIComponent(urlInput);
 
         previewBox.style.display = "block";
         downloadBox.style.display = "flex";
         
-        // Mensaje personalizado solicitado por el usuario en español abajo
         txtEstado.innerText = "[LISTO] ENLACE DE TRANSMISIÓN DETECTADO. PULSA EL BOTÓN EXTRAER MP3 O MP4 PARA RECIBIR TU ARCHIVO.";
     }
 
