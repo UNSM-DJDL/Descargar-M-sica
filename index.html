@@ -3,18 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Descargador de Musica HQ</title>
+    <title>Terminal de Descarga HQ</title>
     <style>
-        body { font-family: 'Courier New', Courier, monospace; background-color: #000; margin: 0; padding: 20px; color: #0f0; display: flex; justify-content: center; align-items: center; min-height: 90vh; }
+        body { font-family: 'Courier New', Courier, monospace; background-color: #000; margin: 0; padding: 20px; color: #0f0; display: flex; justify-content: center; align-items: center; min-height: 95vh; }
         .panel { background: #000; padding: 30px; border-radius: 0px; box-shadow: 0 0 15px rgba(0,255,0,0.5); max-width: 600px; width: 100%; border: 2px solid #0f0; text-align: left; }
         h2 { color: #0f0; font-size: 1.4em; margin-top: 0; text-align: center; font-weight: bold; letter-spacing: 1px; }
         .separator { color: #0f0; margin: 10px 0; font-weight: bold; }
         .input-group { margin: 20px 0; }
         .input-group label { display: block; font-weight: bold; font-size: 0.9em; margin-bottom: 8px; color: #0f0; }
         input[type="text"] { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #0f0; background: #000; color: #0f0; font-size: 1em; font-family: 'Courier New', Courier, monospace; outline: none; }
-        .btn-descargar { display: block; width: 100%; background-color: #000; color: #0f0; text-align: center; padding: 12px; border: 2px solid #0f0; font-size: 1.1em; font-weight: bold; cursor: pointer; font-family: 'Courier New', Courier, monospace; text-transform: uppercase; margin-top: 15px; }
-        .btn-descargar:hover { background-color: #030; }
-        .btn-descargar:disabled { color: #444; border-color: #444; cursor: not-allowed; background-color: #000; }
+        .btn-procesar { display: block; width: 100%; background-color: #000; color: #0f0; text-align: center; padding: 12px; border: 2px solid #0f0; font-size: 1.1em; font-weight: bold; cursor: pointer; font-family: 'Courier New', Courier, monospace; text-transform: uppercase; margin-top: 15px; }
+        .btn-procesar:hover { background-color: #030; }
+        
+        /* Contenedor dinámico de la miniatura del video */
+        .preview-container { display: none; margin: 20px 0; text-align: center; border: 1px dashed #0f0; padding: 15px; background: #050505; }
+        .preview-img { max-width: 100%; height: auto; border: 1px solid #0f0; margin-bottom: 10px; max-height: 200px; }
+        
+        /* Grupo de botones de descarga */
+        .action-buttons { display: none; gap: 15px; margin-top: 15px; }
+        .btn-download { flex: 1; padding: 12px; background: #000; border: 2px solid #0f0; color: #0f0; font-family: 'Courier New', Courier, monospace; font-weight: bold; cursor: pointer; text-transform: uppercase; text-align: center; text-decoration: none; font-size: 0.95em; }
+        .btn-download:hover { background: #0f0; color: #000; font-weight: bold; }
+        
         .estado-descarga { font-size: 1em; color: #0f0; font-weight: bold; margin-top: 15px; min-height: 20px; }
     </style>
 </head>
@@ -22,37 +31,44 @@
 <div class="main-container">
     <div class="panel">
         <div class="separator">====================================================</div>
-        <h2>DESCARGADOR DE AUDIO EN MAXIMA CALIDAD</h2>
+        <h2>SISTEMA MULTIMEDIA DE ALTA FIDELIDAD</h2>
         <div class="separator">====================================================</div>
         
         <div class="input-group">
-            <label>Pega el enlace de YouTube aquí y presiona ENTER o DESCARGAR:</label>
+            <label>[SYS_IN] Pega el enlace de YouTube aquí:</label>
             <input type="text" id="url-enlace" placeholder="https://youtube.com..." autocomplete="off">
         </div>
 
-        <button class="btn-descargar" id="btn-action" onclick="procesarDescargaHQ()">Descargar Canción</button>
+        <button class="btn-procesar" id="btn-action" onclick="cargarVideoPrevia()">Verificar Video</button>
         
+        <!-- Zona de carga e inspección de miniatura -->
+        <div class="preview-container" id="preview-box">
+            <div style="font-size: 0.85em; margin-bottom: 8px; text-align: left;">[MEDIA_INFO] Miniatura localizada:</div>
+            <img src="" id="video-thumb" class="preview-img" alt="Previa de YouTube">
+            
+            <div class="action-buttons" id="download-box">
+                <a href="#" id="link-mp3" target="_blank" class="btn-download">💾 Bajar MP3 (Audio)</a>
+                <a href="#" id="link-mp4" target="_blank" class="btn-download">📺 Bajar MP4 (Video)</a>
+            </div>
+        </div>
+
         <div class="separator">.</div>
-        <div class="estado-descarga" id="mensaje-estado">Listo para recibir enlace de consola...</div>
-        <div class="separator" id="sep-final">====================================================</div>
+        <div class="estado-descarga" id="mensaje-estado">Consola lista. Esperando entrada de datos...</div>
+        <div class="separator">====================================================</div>
     </div>
 </div>
 <script>
-    // Permitir activar la descarga presionando la tecla ENTER en el teclado
+    // Ejecutar verificación con la tecla ENTER de forma automatizada
     document.getElementById('url-enlace').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            procesarDescargaHQ();
-        }
+        if (e.key === 'Enter') { cargarVideoPrevia(); }
     });
 
     function extraerIdVideo(url) {
         try {
-            // Método nativo que limpia y extrae el parámetro 'v' sin importar los agregados extras
             if (url.includes('watch?v=')) {
                 var urlObj = new URL(url);
                 return urlObj.searchParams.get('v');
             }
-            // Soporte para enlaces cortos de celular (youtu.be/ID)
             if (url.includes('youtu.be/')) {
                 var partes = url.split('youtu.be/');
                 if (partes[1]) {
@@ -65,63 +81,51 @@
         }
     }
 
-    function procesarDescargaHQ() {
+    function cargarVideoPrevia() {
         var urlInput = document.getElementById('url-enlace').value.trim();
         var txtEstado = document.getElementById('mensaje-estado');
-        var botonAction = document.getElementById('btn-action');
+        var previewBox = document.getElementById('preview-box');
+        var downloadBox = document.getElementById('download-box');
+        var thumbImg = document.getElementById('video-thumb');
 
         if (!urlInput) {
-            txtEstado.innerText = "Error: Introduce un enlace valido.";
-            txtEstado.style.color = "#ff0000";
+            txtEstado.innerText = "[ERROR] Entrada vacía. Inserta una URL.";
+            txtEstado.style.color = "#f00";
+            previewBox.style.display = "none";
             return;
         }
 
         var videoId = extraerIdVideo(urlInput);
 
-        // Validación estricta del tamaño del ID de YouTube (siempre son 11 caracteres)
         if (!videoId || videoId.length !== 11) {
-            txtEstado.innerText = "Error: Enlace de YouTube incorrecto.";
-            txtEstado.style.color = "#ff0000";
+            txtEstado.innerText = "[ERROR] Estructura de ID de YouTube incorrecta.";
+            txtEstado.style.color = "#f00";
+            previewBox.style.display = "none";
             return;
         }
 
-        // Aviso en pantalla estilo consola
         txtEstado.style.color = "#0f0";
-        txtEstado.innerText = "[STDOUT] ID detectado correctamente. Solicitando MP3 HQ al servidor...";
-        botonAction.disabled = true;
-        botonAction.innerText = "PROCESANDO...";
+        txtEstado.innerText = "[STDOUT] Extrayendo metadatos... Actualizando consola gráfica.";
 
-        // Cifrado Base64 del servidor de conversión estable
-        var servidorSeguro = atob('aHR0cHM6Ly95dXRidXRvbi5jb20vYXBpL2J1dHRvbi9tcDMv');
-        var enlaceFinal = servidorSeguro + videoId;
+        // Generar la URL de la miniatura oficial en resolución HQ
+        var urlMiniatura = "https://youtube.com" + videoId + "/mqdefault.jpg";
+        thumbImg.src = urlMiniatura;
+        
+        // Hacer visible el contenedor de inspección
+        previewBox.style.display = "block";
 
-        try {
-            // Disparador de descarga en segundo plano
-            var descargadorOculto = document.createElement('iframe');
-            descargadorOculto.style.display = 'none';
-            descargadorOculto.src = enlaceFinal;
-            document.body.appendChild(descargadorOculto);
+        // Preparar las pasarelas de conversión codificadas en Base64 para saltar bloqueos
+        var baseAudio = atob('aHR0cHM6Ly95dXRidXRvbi5jb20vYXBpL2J1dHRvbi9tcDMv');
+        var baseVideo = atob('aHR0cHM6Ly95dXRidXRvbi5jb20vYXBpL2J1dHRvbi92aWRlby8=');
 
-            setTimeout(function() {
-                txtEstado.innerText = "[STDOUT] ¡PROCESO COMPLETADO! Descarga enviada con éxito.";
-                botonAction.disabled = false;
-                botonAction.innerText = "Descargar Canción";
-                
-                setTimeout(function() {
-                    txtEstado.innerText = "Listo para recibir enlace de consola...";
-                    document.getElementById('url-enlace').value = "";
-                }, 4000);
-            }, 3000);
+        // Asignar los enlaces directos correspondientes a los botones
+        document.getElementById('link-mp3').href = baseAudio + videoId;
+        document.getElementById('link-mp4').href = baseVideo + videoId;
 
-        } catch (error) {
-            console.error(error);
-            txtEstado.innerText = "Error interno en el servidor de conversion.";
-            txtEstado.style.color = "#ff0000";
-            botonAction.disabled = false;
-            botonAction.innerText = "Descargar Canción";
-        }
+        // Mostrar los botones de acción limpios
+        downloadBox.style.display = "flex";
+        txtEstado.innerText = "[STDOUT] Flujo validado con éxito. Selecciona un formato de salida.";
     }
 </script>
 </body>
 </html>
-
