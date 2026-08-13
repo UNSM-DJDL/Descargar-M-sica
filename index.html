@@ -117,10 +117,25 @@
             text-transform: uppercase; 
             text-align: center; 
             font-size: 0.9em;
-            text-decoration: none;
             box-shadow: 0 0 5px rgba(0,255,255,0.2);
         }
         .btn-download:hover { background: #00ffff; color: #000; text-shadow: none; }
+
+        /* Contenedor seguro interno de conversión (No abre pestañas nuevas) */
+        .frame-contenedor {
+            display: none;
+            margin-top: 20px;
+            width: 100%;
+            height: 150px;
+            border: 2px solid #0a2540;
+            background-color: #000;
+        }
+        .frame-contenedor iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            overflow: hidden;
+        }
         
         .estado-consola { font-size: 0.9em; color: #00ffff; margin-top: 15px; min-height: 20px; word-wrap: break-word; }
     </style>
@@ -145,8 +160,13 @@
             <img src="" id="video-thumb" class="preview-img" alt="Previa Analógica">
             
             <div class="action-buttons" id="download-box">
-                <a href="#" id="link-mp3" target="_blank" class="btn-download" onclick="notificarDescarga()">>> EXTRAER MP3</a>
-                <a href="#" id="link-mp4" target="_blank" class="btn-download" onclick="notificarDescarga()">>> EXTRAER MP4</a>
+                <button class="btn-download" onclick="generarDescargaInterna('mp3')">>> EXTRAER MP3</button>
+                <button class="btn-download" onclick="generarDescargaInterna('mp4')">>> EXTRAER MP4</button>
+            </div>
+
+            <!-- Pantalla interna del reproductor/descargador seguro -->
+            <div class="frame-contenedor" id="caja-descarga">
+                <iframe src="" id="servidor-frame" scrolling="no"></iframe>
             </div>
         </div>
 
@@ -155,73 +175,3 @@
         <div class="linea-decorativa">____________________________________________________</div>
     </div>
 </div>
-<script>
-    document.getElementById('url-enlace').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') { cargarVideoPrevia(); }
-    });
-
-    function extraerIdVideo(url) {
-        try {
-            if (url.includes('watch?v=')) {
-                var urlObj = new URL(url);
-                return urlObj.searchParams.get('v');
-            }
-            if (url.includes('youtu.be/')) {
-                var partes = url.split('youtu.be/');
-                if (partes && partes[1]) {
-                    return partes[1].split(/[?#&]/)[0];
-                }
-            }
-            return null;
-        } catch (e) {
-            return null;
-        }
-    }
-
-    function cargarVideoPrevia() {
-        var urlInput = document.getElementById('url-enlace').value.trim();
-        var txtEstado = document.getElementById('mensaje-estado');
-        var previewBox = document.getElementById('preview-box');
-        var downloadBox = document.getElementById('download-box');
-        var thumbImg = document.getElementById('video-thumb');
-
-        if (!urlInput) {
-            txtEstado.innerText = "[SYS_ERR] ENTRADA VACÍA. INGRESA UN ENLACE.";
-            previewBox.style.display = "none";
-            return;
-        }
-
-        var videoId = extraerIdVideo(urlInput);
-
-        if (!videoId || videoId.length !== 11) {
-            txtEstado.innerText = "[SYS_ERR] ERROR DE ÍNDICE. ID DE YOUTUBE NO VÁLIDO.";
-            previewBox.style.display = "none";
-            return;
-        }
-
-        txtEstado.innerText = "[CARGA] DECODIFICANDO FLUJO DE METADATOS... ACTUALIZANDO PANTALLA.";
-
-        // Combinación de texto simple para construir la URL de la imagen sin usar atob()
-        var urlImagenFinal = "https://youtube.com" + videoId + "/mqdefault.jpg";
-        thumbImg.src = urlImagenFinal;
-        
-        // Pasarela estable de conversión externa directa
-        var linkBaseMp3 = "https://youtubeinmp3.com";
-        var linkBaseMp4 = "https://loader.to";
-
-        document.getElementById('link-mp3').href = linkBaseMp3 + encodeURIComponent(urlInput);
-        document.getElementById('link-mp4').href = linkBaseMp4 + encodeURIComponent(urlInput);
-
-        previewBox.style.display = "block";
-        downloadBox.style.display = "flex";
-        
-        txtEstado.innerText = "[LISTO] ENLACE DE TRANSMISIÓN DETECTADO. PULSA EL BOTÓN EXTRAER MP3 O MP4 PARA RECIBIR TU ARCHIVO.";
-    }
-
-    function notificarDescarga() {
-        var txtEstado = document.getElementById('mensaje-estado');
-        txtEstado.innerText = "[PROCESO] SOLICITUD ENVIADA. EL SERVIDOR PROCESARÁ EL ARCHIVO EN LA NUEVA PESTAÑA.";
-    }
-</script>
-</body>
-</html>
