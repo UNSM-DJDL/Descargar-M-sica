@@ -3,222 +3,386 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Estación de Carga Retro - VINTAGE BLUE</title>
+    <title>Descargador de Música YouTube</title>
     <style>
-        @keyframes flicker {
-            0% { opacity: 0.97; }
-            50% { opacity: 1; }
-            100% { opacity: 0.98; }
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
-            font-family: 'Courier New', Courier, monospace; 
-            background-color: #050b14; 
-            margin: 0; 
-            padding: 20px; 
-            color: #00ffff; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            min-height: 95vh;
-            text-shadow: 0 0 6px rgba(0, 255, 255, 0.6);
-            animation: flicker 0.2s infinite;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); 
+            min-height: 100vh; padding: 20px;
         }
-
-        .crt-monitor { 
-            background: #020710; 
-            padding: 30px; 
-            border-radius: 16px; 
-            box-shadow: inset 0 0 50px rgba(0,0,0,1), 0 0 25px rgba(0,255,255,0.2); 
-            max-width: 580px; 
-            width: 100%; 
-            border: 4px solid #0a2540; 
-            text-align: left;
-        }
-
-        h2 { 
-            color: #00ffff; 
-            font-size: 1.3em; 
-            margin-top: 0; 
-            text-align: center; 
-            font-weight: bold; 
-            letter-spacing: 2px;
-        }
-
-        .linea-decorativa { 
-            color: #0a2540; 
-            margin: 10px 0; 
-            font-weight: bold; 
-            letter-spacing: -1px;
-        }
-
-        .input-group { margin: 25px 0; }
-        .input-group label { display: block; font-weight: bold; font-size: 0.85em; margin-bottom: 10px; color: #00ffff; }
-        
-        input[type="text"] { 
-            width: 100%; 
-            padding: 12px; 
-            box-sizing: border-box; 
-            border: 2px solid #0a2540; 
-            background: #010308; 
-            color: #00ffff; 
-            font-size: 0.95em; 
-            font-family: 'Courier New', Courier, monospace; 
-            outline: none;
-        }
-        input[type="text"]:focus { border-color: #00ffff; box-shadow: 0 0 8px rgba(0,255,255,0.5); }
-
-        .btn-vintage { 
-            display: block; 
-            width: 100%; 
-            background-color: #010308; 
-            color: #00ffff; 
-            text-align: center; 
-            padding: 12px; 
-            border: 2px solid #00ffff; 
-            font-size: 1em; 
-            font-weight: bold; 
-            cursor: pointer; 
-            font-family: 'Courier New', Courier, monospace; 
-            text-transform: uppercase; 
-            margin-top: 15px;
-            box-shadow: 0 0 5px rgba(0,255,255,0.3);
-        }
-        .btn-vintage:hover { background-color: #0a2540; color: #fff; }
-        
-        .preview-container { 
-            display: none; 
-            margin: 25px 0; 
-            text-align: center; 
-            border: 2px dashed #0a2540; 
-            padding: 15px; 
-            background: #01050f; 
-        }
-        .preview-img { 
-            max-width: 100%; 
-            height: auto; 
-            border: 2px solid #00ffff; 
-            margin-bottom: 15px; 
-            max-height: 180px; 
-            box-shadow: 0 0 10px rgba(0,255,255,0.3);
-        }
-        
-        .action-buttons { display: none; gap: 15px; margin-top: 10px; }
-        
-        .btn-download { 
-            flex: 1; 
-            padding: 12px; 
-            background: #010308; 
-            border: 2px solid #00ffff; 
-            color: #00ffff; 
-            font-family: 'Courier New', Courier, monospace; 
-            font-weight: bold; 
-            cursor: pointer; 
-            text-transform: uppercase; 
-            text-align: center; 
-            font-size: 0.9em;
-            text-decoration: none;
-            box-shadow: 0 0 5px rgba(0,255,255,0.2);
-        }
-        .btn-download:hover { background: #00ffff; color: #000; text-shadow: none; }
-        
-        .estado-consola { font-size: 0.9em; color: #00ffff; margin-top: 15px; min-height: 20px; word-wrap: break-word; }
+        .container { max-width: 1300px; margin: 0 auto; }
+        .header { text-align: center; color: white; margin-bottom: 30px; }
+        .header h1 { font-size: 2.4em; margin-bottom: 8px; }
+        .header p { font-size: 1em; opacity: 0.9; }
+        .main-container { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-bottom: 20px; }
+        .panel { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        h2 { font-size: 1.2em; margin: 0 0 18px 0; border-bottom: 3px solid #2a5298; padding-bottom: 10px; color: #1e3c72; }
+        .input-group { margin-bottom: 14px; }
+        .input-group label { display: block; font-weight: 600; font-size: 0.88em; margin-bottom: 5px; color: #333; }
+        input[type="text"], select { width: 100%; padding: 11px; border: 2px solid #ddd; border-radius: 6px; font-size: 0.93em; font-family: 'Segoe UI', sans-serif; transition: border-color 0.2s; }
+        input[type="text"]:focus, select:focus { outline: none; border-color: #2a5298; box-shadow: 0 0 5px rgba(42,82,152,0.25); }
+        .estado { font-size: 0.93em; text-align: center; padding: 12px; border-radius: 6px; background: #e3f2fd; color: #1565c0; margin: 12px 0; min-height: 46px; display: flex; align-items: center; justify-content: center; }
+        .estado.exito { background: #c8e6c9; color: #2e7d32; border-left: 4px solid #4caf50; }
+        .estado.error { background: #ffcdd2; color: #c62828; border-left: 4px solid #f44336; }
+        .estado.warning { background: #fff9c4; color: #f57f17; border-left: 4px solid #fbc02d; }
+        .estado.procesando { background: #e8eaf6; color: #283593; border-left: 4px solid #3f51b5; }
+        .btn { display: block; width: 100%; color: white; padding: 13px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: all 0.3s; margin-bottom: 10px; font-size: 1em; font-family: 'Segoe UI', sans-serif; }
+        .btn-primary { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); }
+        .btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(30,60,114,0.4); }
+        .btn-dl { background: linear-gradient(135deg, #00b894 0%, #00cec9 100%); font-size: 1.05em; }
+        .btn-dl:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(0,184,148,0.4); }
+        .btn-cobalt { background: linear-gradient(135deg, #7941a5 0%, #5a2882 100%); font-size: 1em; }
+        .btn-cobalt:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(121,65,165,0.4); }
+        .btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none !important; }
+        .preview-wrap { display: none; }
+        .preview-wrap.activo { display: block; }
+        .thumb-img { width: 100%; border-radius: 8px; margin-bottom: 12px; border: 2px solid #2a5298; }
+        .info-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #eee; font-size: 0.88em; }
+        .info-lbl { font-weight: 600; color: #1e3c72; }
+        .info-val { color: #555; text-align: right; max-width: 58%; word-break: break-word; }
+        .iframe-wrap { background: #020710; border-radius: 8px; padding: 10px; border: 2px solid #2a5298; margin: 12px 0; }
+        .opciones { background: #f5f7fa; padding: 15px; border-radius: 8px; margin: 12px 0; border: 2px solid #e0e0e0; }
+        .callout { background: #e3f2fd; border-left: 4px solid #2196f3; padding: 10px 12px; margin: 10px 0; border-radius: 4px; font-size: 0.85em; color: #1565c0; }
+        .progress-bar { width: 100%; height: 22px; background: #e0e0e0; border-radius: 12px; margin: 10px 0; overflow: hidden; display: none; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #1e3c72, #00b894); width: 0%; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.8em; font-weight: bold; transition: width 0.4s; }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+        .stat-item { background: #f5f5f5; padding: 10px; border-radius: 6px; border-left: 3px solid #2a5298; }
+        .stat-lbl { font-size: 0.75em; color: #777; font-weight: 600; text-transform: uppercase; }
+        .stat-val { font-size: 1.05em; color: #1e3c72; font-weight: bold; margin-top: 3px; }
+        .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(30,60,114,0.2); border-top-color: #2a5298; border-radius: 50%; animation: spin 0.75s linear infinite; margin-right: 7px; vertical-align: middle; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .dl-btn-directo { display: block; width: 100%; padding: 14px; background: linear-gradient(135deg, #6c5ce7, #a29bfe); color: white; border: none; border-radius: 8px; font-size: 1em; font-weight: bold; cursor: pointer; margin-top: 8px; transition: all 0.3s; font-family: 'Segoe UI', sans-serif; text-align: center; text-decoration: none; }
+        .dl-btn-directo:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(108,92,231,0.45); }
+        .nota-api { background: #fff3e0; border-left: 4px solid #ff9800; padding: 12px; border-radius: 6px; margin: 10px 0; font-size: 0.85em; color: #e65100; }
+        .footer { text-align: center; color: white; margin-top: 28px; font-size: 0.88em; opacity: 0.8; }
+        @media (max-width: 880px) { .main-container { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
-<div class="main-container">
-    <div class="crt-monitor">
-        <div class="linea-decorativa">____________________________________________________</div>
-        <h2>TERMINAL MULTIMEDIA AZUL // VINTAGE-198X</h2>
-        <div class="linea-decorativa">____________________________________________________</div>
-        
-        <div class="input-group">
-            <label>[UNIDAD_A] INGRESE LA URL DE YOUTUBE:</label>
-            <input type="text" id="url-enlace" placeholder="PEGAR URL AQUÍ..." autocomplete="off">
-        </div>
+<div class="container">
+    <div class="header">
+        <h1>🎵 Descargador de Música YouTube</h1>
+        <p>Vista previa integrada · Descarga directa sin pestañas adicionales</p>
+    </div>
 
-        <button class="btn-vintage" id="btn-action" onclick="cargarVideoPrevia()">CARGAR DATOS_VIDEO</button>
-        
-        <!-- Bloque de visualización -->
-        <div class="preview-container" id="preview-box">
-            <div style="font-size: 0.8em; margin-bottom: 10px; text-align: left;">[INFO_PISTA] IMAGEN DE VISTA PREVIA CONFIRMADA:</div>
-            <img src="" id="video-thumb" class="preview-img" alt="Previa Analógica">
-            
-            <div class="action-buttons" id="download-box">
-                <a href="#" id="link-mp3" target="_blank" class="btn-download" onclick="notificarDescarga()">>> EXTRAER MP3</a>
-                <a href="#" id="link-mp4" target="_blank" class="btn-download" onclick="notificarDescarga()">>> EXTRAER MP4</a>
+    <div class="main-container">
+
+        <!-- PANEL IZQUIERDO -->
+        <div class="panel">
+            <h2>📥 Cargar y Descargar</h2>
+
+            <div class="input-group">
+                <label>URL de YouTube:</label>
+                <input type="text" id="urlVideo" placeholder="https://www.youtube.com/watch?v=..." autocomplete="off">
+            </div>
+
+            <button class="btn btn-primary" onclick="cargarVideo()">
+                🔍 Cargar Vista Previa
+            </button>
+
+            <div class="opciones">
+                <strong style="display:block;margin-bottom:10px;color:#1e3c72;">⚙️ CALIDAD DE DESCARGA</strong>
+
+                <div class="input-group">
+                    <label>Bitrate MP3:</label>
+                    <select id="calidad" onchange="actualizarTamano()">
+                        <option value="128">128 kbps — Pequeño (básico)</option>
+                        <option value="192" selected>192 kbps ⭐ RECOMENDADO</option>
+                        <option value="256">256 kbps — Excelente</option>
+                        <option value="320">320 kbps — Máximo</option>
+                    </select>
+                    <div class="callout">
+                        💡 AAC de YouTube ≈ MP3 192 kbps. Más alto no mejora lo que oyes.
+                    </div>
+                </div>
+            </div>
+
+            <div class="progress-bar" id="progressBar">
+                <div class="progress-fill" id="progressFill">0%</div>
+            </div>
+
+            <div class="estado" id="estado">
+                ✓ Sistema listo. Ingresa una URL de YouTube.
+            </div>
+
+            <!-- BOTONES DE DESCARGA -->
+            <button class="btn btn-dl" id="btnDl" onclick="descargarDirecto()" disabled>
+                ⬇️ Descarga en la misma pestaña
+            </button>
+
+            <button class="btn btn-cobalt" id="btnCobalt" onclick="descargarConCobalt()" disabled>
+                ⚡ Descargar con Cobalt (misma pestaña)
+            </button>
+
+            <!-- ENLACE CAÍDA / FALLBACK -->
+            <a id="linkDescarga" style="display:none;" class="dl-btn-directo" href="#" download>
+                💾 Guardar archivo MP3
+            </a>
+
+            <div class="nota-api" id="notaApi" style="display:none;">
+                ⚠️ Si la descarga automatizada por API es bloqueada por tu navegador, haz clic en el botón de abajo para ir a Cobalt en esta misma pestaña.
             </div>
         </div>
 
-        <div class="linea-decorativa">.</div>
-        <div class="estado-consola" id="mensaje-estado">SISTEMA LISTO. ESPERANDO ENLACE DE CONSOLA...</div>
-        <div class="linea-decorativa">____________________________________________________</div>
+        <!-- PANEL DERECHO -->
+        <div class="panel">
+            <h2>🎧 Vista Previa</h2>
+
+            <div class="preview-wrap" id="previewWrap">
+                <img id="thumb" class="thumb-img" alt="Miniatura" src="">
+
+                <div style="margin-bottom:12px;">
+                    <div class="info-row">
+                        <span class="info-lbl">Título:</span>
+                        <span class="info-val" id="infoTitulo">-</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-lbl">Canal:</span>
+                        <span class="info-val" id="infoCanal">-</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-lbl">Tamaño estimado:</span>
+                        <span class="info-val" id="infoTamano">-</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-lbl">Bitrate seleccionado:</span>
+                        <span class="info-val" id="infoBitrate">192 kbps</span>
+                    </div>
+                </div>
+
+                <div class="iframe-wrap">
+                    <div id="iframePlayer"></div>
+                </div>
+            </div>
+
+            <!-- Stats técnicos -->
+            <div style="background:#f5f5f5; border-left:4px solid #2a5298; padding:15px; border-radius:8px; margin-top:12px;">
+                <strong>📊 Información Técnica:</strong>
+                <div class="stats-grid" id="statsGrid" style="display:none;">
+                    <div class="stat-item">
+                        <div class="stat-lbl">Codec Original</div>
+                        <div class="stat-val">AAC</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-lbl">Formato Final</div>
+                        <div class="stat-val">MP3</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-lbl">Bitrate</div>
+                        <div class="stat-val" id="statBitrate">192 kbps</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-lbl">Tamaño Est.</div>
+                        <div class="stat-val" id="statTamano">-</div>
+                    </div>
+                </div>
+                <p id="statsMensaje" style="font-size:0.88em;color:#777;margin-top:8px;">Carga un video para ver estadísticas.</p>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="footer">
+        <p>🎵 Descargador de Música YouTube | AAC → MP3 | 192 kbps Óptimo</p>
+        <p>Sin pestañas adicionales</p>
     </div>
 </div>
 
 <script>
-    document.getElementById('url-enlace').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') { cargarVideoPrevia(); }
+    var vidId = null;
+    var duracion = 210; // segundos estimados
+
+    function extraerId(url) {
+        try {
+            if (url.includes('youtube.com/watch')) return new URL(url).searchParams.get('v');
+            if (url.includes('youtu.be/')) return url.split('youtu.be/')[1].split(/[?#]/)[0];
+            if (url.includes('youtube.com/embed/')) return url.split('embed/')[1].split('?')[0];
+        } catch(e) {}
+        return null;
+    }
+
+    function calcTamano(seg, kbps) {
+        return ((seg * kbps) / 8 / 1024).toFixed(1);
+    }
+
+    function actualizarTamano() {
+        var kbps = parseInt(document.getElementById('calidad').value);
+        var tam = calcTamano(duracion, kbps);
+        document.getElementById('infoTamano').innerText = tam + ' MB (~' + kbps + ' kbps)';
+        document.getElementById('infoBitrate').innerText = kbps + ' kbps';
+        document.getElementById('statBitrate').innerText = kbps + ' kbps';
+        document.getElementById('statTamano').innerText = tam + ' MB';
+    }
+
+    function setEstado(msg, tipo) {
+        var el = document.getElementById('estado');
+        el.className = 'estado' + (tipo ? ' ' + tipo : '');
+        el.innerHTML = msg;
+    }
+
+    function mostrarProgreso(pct) {
+        var bar = document.getElementById('progressBar');
+        var fill = document.getElementById('progressFill');
+        if (pct === null) { bar.style.display = 'none'; return; }
+        bar.style.display = 'block';
+        fill.style.width = pct + '%';
+        fill.innerText = pct + '%';
+    }
+
+    document.getElementById('urlVideo').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') cargarVideo();
     });
 
-    function extraerIdVideo(url) {
-        try {
-            if (url.includes('watch?v=')) {
-                var urlObj = new URL(url);
-                return urlObj.searchParams.get('v');
+    function cargarVideo() {
+        var url = document.getElementById('urlVideo').value.trim();
+        if (!url) {
+            setEstado('❌ Ingresa una URL de YouTube.', 'error');
+            return;
+        }
+        var id = extraerId(url);
+        if (!id) {
+            setEstado('❌ URL no reconocida. Verifica que sea un enlace de YouTube válido.', 'error');
+            return;
+        }
+        vidId = id;
+
+        setEstado('<span class="spinner"></span>Cargando información...', 'procesando');
+
+        // Miniatura con fallback
+        var thumb = document.getElementById('thumb');
+        thumb.src = 'https://img.youtube.com/vi/' + id + '/maxresdefault.jpg';
+        thumb.onerror = function() {
+            this.onerror = null;
+            this.src = 'https://img.youtube.com/vi/' + id + '/hqdefault.jpg';
+        };
+
+        // Player embebido en misma pestaña
+        document.getElementById('iframePlayer').innerHTML =
+            '<iframe width="100%" height="195" src="https://www.youtube.com/embed/' + id +
+            '?rel=0" frameborder="0" allowfullscreen style="border-radius:6px;"></iframe>';
+
+        // Metadatos
+        fetch('https://noembed.com/embed?url=https://www.youtube.com/watch?v=' + id)
+            .then(function(r) { return r.json(); })
+            .then(function(d) {
+                document.getElementById('infoTitulo').innerText = d.title || '(Sin título)';
+                document.getElementById('infoCanal').innerText = d.author_name || 'Desconocido';
+                actualizarTamano();
+            })
+            .catch(function() {
+                document.getElementById('infoTitulo').innerText = '(No disponible)';
+                document.getElementById('infoCanal').innerText = 'Desconocido';
+                actualizarTamano();
+            });
+
+        document.getElementById('previewWrap').classList.add('activo');
+        document.getElementById('statsGrid').style.display = 'grid';
+        document.getElementById('statsMensaje').style.display = 'none';
+        document.getElementById('btnDl').disabled = false;
+        document.getElementById('btnCobalt').disabled = false;
+
+        setEstado('✓ Video cargado. Selecciona tu método de descarga preferido.', 'exito');
+    }
+
+    // === OPCIÓN 1: DESCARGA DIRECTA (SIN CAMBIAR DE PESTAÑA) ===
+    async function descargarDirecto() {
+        if (!vidId) {
+            setEstado('❌ Carga primero un video.', 'error');
+            return;
+        }
+
+        var urlYT = 'https://www.youtube.com/watch?v=' + vidId;
+        var bitrate = document.getElementById('calidad').value;
+        var titulo = document.getElementById('infoTitulo').innerText || 'musica';
+
+        setEstado('<span class="spinner"></span>Iniciando motor de descarga...', 'procesando');
+        mostrarProgreso(15);
+        deshabilitarBotones(true);
+
+        // Intentos usando diferentes servicios backend
+        var apis = [
+            {
+                url: 'https://api.cobalt.tools/',
+                body: { url: urlYT, downloadMode: 'audio', audioFormat: 'mp3', audioBitrate: bitrate }
+            },
+            {
+                url: 'https://co.wuk.sh/api/json',
+                body: { url: urlYT, isAudioOnly: true, aFormat: 'mp3', audioBitrate: bitrate }
             }
-            if (url.includes('youtu.be/')) {
-                var partes = url.split('youtu.be/');
-                if (partes && partes[1]) {
-                    var limpio = partes[1].split(/[?#&]/);
-                    return limpio[0];
+        ];
+
+        for (var i = 0; i < apis.length; i++) {
+            try {
+                mostrarProgreso(30 + (i * 20));
+                setEstado('<span class="spinner"></span>Procesando audio (Servidor ' + (i+1) + ')...', 'procesando');
+
+                var resp = await fetch(apis[i].url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    body: JSON.stringify(apis[i].body)
+                });
+
+                if (resp.ok) {
+                    var data = await resp.json();
+                    var fileUrl = data.url || data.urls;
+
+                    if (fileUrl) {
+                        mostrarProgreso(75);
+                        setEstado('<span class="spinner"></span>Transfiriendo archivo...', 'procesando');
+
+                        // Descargar como blob si es posible o forzar enlace
+                        try {
+                            var bResp = await fetch(fileUrl);
+                            var blob = await bResp.blob();
+                            var blobUrl = URL.createObjectURL(blob);
+                            ejecutarDescarga(blobUrl, titulo + '.mp3');
+                        } catch (eBlob) {
+                            // Fallback a enlace directo si la API no permite Blob
+                            ejecutarDescarga(fileUrl, titulo + '.mp3');
+                        }
+
+                        mostrarProgreso(100);
+                        setTimeout(function() { mostrarProgreso(null); }, 1500);
+                        setEstado('✅ ¡Descarga completada con éxito!', 'exito');
+                        deshabilitarBotones(false);
+                        return;
+                    }
                 }
+            } catch (err) {
+                console.warn('API ' + (i+1) + ' no disponible:', err);
             }
-            return null;
-        } catch (e) {
-            return null;
         }
+
+        // Si la descarga automática directa falla
+        mostrarProgreso(null);
+        deshabilitarBotones(false);
+        setEstado('⚠️ El servidor automático no respondió. Usa la opción "Descargar con Cobalt".', 'warning');
     }
 
-    function cargarVideoPrevia() {
-        var urlInput = document.getElementById('url-enlace').value.trim();
-        var txtEstado = document.getElementById('mensaje-estado');
-        var previewBox = document.getElementById('preview-box');
-        var downloadBox = document.getElementById('download-box');
-        var thumbImg = document.getElementById('video-thumb');
-
-        if (!urlInput) {
-            txtEstado.innerText = "[SYS_ERR] ENTRADA VACÍA. INGRESA UN ENLACE.";
-            previewBox.style.display = "none";
+    // === OPCIÓN 2: DESCARGAR USANDO COBALT (EN LA MISMA PESTAÑA) ===
+    function descargarConCobalt() {
+        if (!vidId) {
+            setEstado('❌ Carga primero un video.', 'error');
             return;
         }
-
-        var videoId = extraerIdVideo(urlInput);
-
-        if (!videoId || videoId.length !== 11) {
-            txtEstado.innerText = "[SYS_ERR] ERROR DE ÍNDICE. ID DE YOUTUBE NO VÁLIDO.";
-            previewBox.style.display = "none";
-            return;
-        }
-
-        txtEstado.innerText = "[CARGA] COPIANDO FLUJO DE IMAGEN... ACTUALIZANDO PANTALLA.";
-
-        // Servidor oficial de imágenes estructurado correctamente
-        thumbImg.src = "https://youtube.com" + videoId + "/mqdefault.jpg";
-        
-        // APIs de descarga directa estables que forzarán el archivo adjunto
-        document.getElementById('link-mp3').href = "https://vexdl.com" + encodeURIComponent(urlInput) + "&format=mp3";
-        document.getElementById('link-mp4').href = "https://vexdl.com" + encodeURIComponent(urlInput) + "&format=mp4";
-
-        previewBox.style.display = "block";
-        downloadBox.style.display = "flex";
-        
-        txtEstado.innerText = "[LISTO] ENLACE DE TRANSMISIÓN DETECTADO. PULSA EL BOTÓN EXTRAER MP3 O MP4 PARA RECIBIR TU ARCHIVO.";
+        var urlYT = 'https://www.youtube.com/watch?v=' + vidId;
+        // Redirecciona a Cobalt en la MISMA pestaña
+        window.location.href = 'https://cobalt.tools/#' + encodeURIComponent(urlYT);
     }
 
-    function notificarDescarga() {
-        var txtEstado = document.getElementById('mensaje-estado');
-        txtEstado.innerText = "[PROCESO] SOLICITUD ENVIADA. TU NAVEGADOR EMPEZARÁ LA DESCARGA DIRECTA DEL ARCHIVO.";
+    function ejecutarDescarga(url, nombreArchivo) {
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = nombreArchivo.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s_\-]/g, '').trim().substring(0, 60);
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    }
+
+    function deshabilitarBotones(estado) {
+        document.getElementById('btnDl').disabled = estado;
+        document.getElementById('btnCobalt').disabled = estado;
     }
 </script>
 </body>
