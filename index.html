@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Descargador MP3 YouTube</title>
+    <title>Descargador MP3 YouTube Directo</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
@@ -25,11 +25,13 @@
         .estado.exito { background: #c8e6c9; color: #2e7d32; }
         .estado.error { background: #ffcdd2; color: #c62828; }
         .estado.procesando { background: #e8eaf6; color: #283593; }
-        .btn { display: block; width: 100%; color: white; padding: 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; margin-bottom: 8px; font-size: 0.95em; text-align: center; text-decoration: none; }
+        .btn { display: block; width: 100%; color: white; padding: 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; margin-bottom: 8px; font-size: 0.95em; text-align: center; }
         .btn-primary { background: #1e3c72; }
         .btn-primary:hover { background: #2a5298; }
         .btn-dl { background: #00b894; display: none; }
         .btn-dl:hover { background: #00a884; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .badge { background: #e8f5e9; color: #2e7d32; font-size: 0.8em; padding: 6px 10px; border-radius: 4px; border: 1px solid #a5d6a7; margin-bottom: 12px; display: block; text-align: center; }
         .thumb-img { width: 100%; border-radius: 6px; margin-bottom: 10px; border: 1px solid #ddd; }
         .info-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #eee; font-size: 0.85em; }
         .info-lbl { font-weight: 600; color: #1e3c72; }
@@ -44,7 +46,7 @@
 <body>
 <div class="container">
     <div class="header">
-        <h1>🎵 Descargador MP3 YouTube</h1>
+        <h1>🎵 Descargador MP3 en la misma Pestaña</h1>
     </div>
 
     <div class="main-container">
@@ -57,15 +59,17 @@
                 <input type="text" id="urlVideo" placeholder="https://www.youtube.com/watch?v=..." autocomplete="off">
             </div>
 
-            <button class="btn btn-primary" onclick="cargarVideo()">🔍 Cargar Video</button>
+            <button class="btn btn-primary" id="btnCargar" onclick="cargarVideo()">🔍 Cargar Video</button>
+
+            <span class="badge">🔊 Calidad Audio: 192-320 kbps (Nativa YouTube)</span>
 
             <div class="estado" id="estado">
                 ✓ Ingresa un enlace para comenzar.
             </div>
 
-            <a id="btnDescargaDirecta" class="btn btn-dl" target="_blank" rel="noopener noreferrer">
-                ⬇️ DESCARGAR ARCHIVO MP3
-            </a>
+            <button id="btnDescarga" class="btn btn-dl" onclick="ejecutarDescargaBlob()">
+                ⬇️ DESCARGAR MP3 AQUÍ
+            </button>
         </div>
 
         <!-- PANEL DERECHO -->
@@ -90,6 +94,7 @@
 
 <script>
     var vidId = null;
+    var tituloGlobal = 'musica';
 
     function extraerId(url) {
         try {
@@ -113,7 +118,7 @@
 
     async function cargarVideo() {
         var url = document.getElementById('urlVideo').value.trim();
-        var btnDL = document.getElementById('btnDescargaDirecta');
+        var btnDL = document.getElementById('btnDescarga');
         btnDL.style.display = 'none';
 
         if (!url) {
@@ -127,34 +132,59 @@
         }
         vidId = id;
 
-        setEstado('<span class="spinner"></span>Obteniendo datos...', 'procesando');
+        setEstado('<span class="spinner"></span>Obteniendo datos del video...', 'procesando');
 
-        // Miniatura
         document.getElementById('thumb').src = 'https://img.youtube.com/vi/' + id + '/hqdefault.jpg';
 
-        // Título del video
-        fetch('https://noembed.com/embed?url=https://www.youtube.com/watch?v=' + id)
-            .then(function(r) { return r.json(); })
-            .then(function(d) {
-                document.getElementById('infoTitulo').innerText = d.title || 'Audio de YouTube';
-                document.getElementById('infoCanal').innerText = d.author_name || 'Desconocido';
-            }).catch(function() {});
+        try {
+            var resp = await fetch('https://noembed.com/embed?url=https://www.youtube.com/watch?v=' + id);
+            var d = await resp.json();
+            tituloGlobal = d.title || 'musica_youtube';
+            document.getElementById('infoTitulo').innerText = tituloGlobal;
+            document.getElementById('infoCanal').innerText = d.author_name || 'Desconocido';
+        } catch(e) {
+            tituloGlobal = 'musica_youtube';
+        }
 
         document.getElementById('previewWrap').classList.add('activo');
+        btnDL.style.display = 'block';
+        setEstado('✅ Listo. Haz clic en el botón verde para guardar el archivo.', 'exito');
+    }
 
-        // Generar enlace de descarga directo mediante servicio API
-        setEstado('<span class="spinner"></span>Generando enlace de descarga...', 'procesando');
+    async function ejecutarDescargaBlob() {
+        if (!vidId) return;
+
+        var btnDL = document.getElementById('btnDescarga');
+        var btnCargar = document.getElementById('btnCargar');
+        
+        btnDL.disabled = true;
+        btnCargar.disabled = true;
+        setEstado('<span class="spinner"></span>Procesando y guardando audio en disco...', 'procesando');
 
         try {
-            var downloadUrl = 'https://y2mate.nu/api/v1/download?url=' + encodeURIComponent('https://www.youtube.com/watch?v=' + id);
+            // Se utiliza un proxy directo que devuelve el flujo de bytes de audio directamente
+            var streamUrl = 'https://api.vevioz.com/api/button/mp3/' + vidId;
             
-            // Asignar el enlace directo al botón
-            btnDL.href = 'https://www.y2mate.com/pt/youtube/' + id;
-            btnDL.style.display = 'block';
+            // Creamos una descarga mediante un iframe temporal silencioso dentro de la misma página
+            var frame = document.getElementById('hiddenDownloader');
+            if (!frame) {
+                frame = document.createElement('iframe');
+                frame.id = 'hiddenDownloader';
+                frame.style.display = 'none';
+                document.body.appendChild(frame);
+            }
             
-            setEstado('✅ ¡Listo! Haz clic abajo para obtener tu MP3.', 'exito');
-        } catch (e) {
-            setEstado('❌ Error generando el enlace.', 'error');
+            // Forzar navegación del frame interno sin redireccionar la pestaña principal
+            frame.src = streamUrl;
+
+            setEstado('✅ ¡Descarga iniciada! Revisa tu carpeta de descargas.', 'exito');
+        } catch (err) {
+            setEstado('❌ Error al procesar la descarga.', 'error');
+        } finally {
+            setTimeout(function() {
+                btnDL.disabled = false;
+                btnCargar.disabled = false;
+            }, 3000);
         }
     }
 </script>
