@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -33,6 +32,8 @@
         .btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(30,60,114,0.4); }
         .btn-dl { background: linear-gradient(135deg, #00b894 0%, #00cec9 100%); font-size: 1.05em; }
         .btn-dl:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(0,184,148,0.4); }
+        .btn-cobalt { background: linear-gradient(135deg, #7941a5 0%, #5a2882 100%); font-size: 1em; }
+        .btn-cobalt:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(121,65,165,0.4); }
         .btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none !important; }
         .preview-wrap { display: none; }
         .preview-wrap.activo { display: block; }
@@ -51,9 +52,6 @@
         .stat-val { font-size: 1.05em; color: #1e3c72; font-weight: bold; margin-top: 3px; }
         .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(30,60,114,0.2); border-top-color: #2a5298; border-radius: 50%; animation: spin 0.75s linear infinite; margin-right: 7px; vertical-align: middle; }
         @keyframes spin { to { transform: rotate(360deg); } }
-        .dl-btn-directo { display: block; width: 100%; padding: 16px; background: linear-gradient(135deg, #6c5ce7, #a29bfe); color: white; border: none; border-radius: 8px; font-size: 1.1em; font-weight: bold; cursor: pointer; margin-top: 8px; transition: all 0.3s; font-family: 'Segoe UI', sans-serif; text-align: center; text-decoration: none; }
-        .dl-btn-directo:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(108,92,231,0.45); }
-        .nota-api { background: #fff3e0; border-left: 4px solid #ff9800; padding: 12px; border-radius: 6px; margin: 10px 0; font-size: 0.85em; color: #e65100; }
         .footer { text-align: center; color: white; margin-top: 28px; font-size: 0.88em; opacity: 0.8; }
         @media (max-width: 880px) { .main-container { grid-template-columns: 1fr; } }
     </style>
@@ -66,7 +64,6 @@
     </div>
 
     <div class="main-container">
-
         <!-- PANEL IZQUIERDO -->
         <div class="panel">
             <h2>📥 Cargar y Descargar</h2>
@@ -82,7 +79,6 @@
 
             <div class="opciones">
                 <strong style="display:block;margin-bottom:10px;color:#1e3c72;">⚙️ CALIDAD DE DESCARGA</strong>
-
                 <div class="input-group">
                     <label>Bitrate MP3:</label>
                     <select id="calidad" onchange="actualizarTamano()">
@@ -105,20 +101,13 @@
                 ✓ Sistema listo. Ingresa una URL de YouTube.
             </div>
 
-            <!-- BOTÓN DE DESCARGA DIRECTO -->
             <button class="btn btn-dl" id="btnDl" onclick="descargarDirecto()" disabled>
                 ⬇️ Descargar MP3 (en esta pestaña)
             </button>
 
-            <!-- ENLACE DIRECTO como fallback -->
-            <a id="linkDescarga" style="display:none;" class="dl-btn-directo" href="#" download>
-                💾 Guardar archivo MP3
-            </a>
-
-            <div class="nota-api" id="notaApi" style="display:none;">
-                ⚠️ La API de descarga directa requiere CORS. Si el botón no funciona, 
-                usa el enlace alternativo abajo — se abre <strong>en esta misma pestaña</strong>.
-            </div>
+            <button class="btn btn-cobalt" id="btnCobalt" onclick="descargarConCobalt()" disabled>
+                ⚡ Abrir cobalt.tools (mejor alternativa)
+            </button>
         </div>
 
         <!-- PANEL DERECHO -->
@@ -152,7 +141,6 @@
                 </div>
             </div>
 
-            <!-- Stats técnicos -->
             <div style="background:#f5f5f5; border-left:4px solid #2a5298; padding:15px; border-radius:8px; margin-top:12px;">
                 <strong>📊 Información Técnica:</strong>
                 <div class="stats-grid" id="statsGrid" style="display:none;">
@@ -176,18 +164,16 @@
                 <p id="statsMensaje" style="font-size:0.88em;color:#777;margin-top:8px;">Carga un video para ver estadísticas.</p>
             </div>
         </div>
-
     </div>
 
     <div class="footer">
         <p>🎵 Descargador de Música YouTube | AAC → MP3 | 192 kbps Óptimo</p>
-        <p>Powered by cobalt.tools API · Sin pestañas adicionales</p>
     </div>
 </div>
 
 <script>
     var vidId = null;
-    var duracion = 210; // segundos estimados
+    var duracion = 210;
 
     function extraerId(url) {
         try {
@@ -238,14 +224,13 @@
         }
         var id = extraerId(url);
         if (!id) {
-            setEstado('❌ URL no reconocida. Verifica que sea un enlace de YouTube válido.', 'error');
+            setEstado('❌ URL no reconocida. Verifica el enlace.', 'error');
             return;
         }
         vidId = id;
 
         setEstado('<span class="spinner"></span>Cargando información...', 'procesando');
 
-        // Miniatura con fallback
         var thumb = document.getElementById('thumb');
         thumb.src = 'https://img.youtube.com/vi/' + id + '/maxresdefault.jpg';
         thumb.onerror = function() {
@@ -253,12 +238,10 @@
             this.src = 'https://img.youtube.com/vi/' + id + '/hqdefault.jpg';
         };
 
-        // Player embebido en misma pestaña
         document.getElementById('iframePlayer').innerHTML =
             '<iframe width="100%" height="195" src="https://www.youtube.com/embed/' + id +
             '?rel=0" frameborder="0" allowfullscreen style="border-radius:6px;"></iframe>';
 
-        // Metadatos
         fetch('https://noembed.com/embed?url=https://www.youtube.com/watch?v=' + id)
             .then(function(r) { return r.json(); })
             .then(function(d) {
@@ -276,8 +259,9 @@
         document.getElementById('statsGrid').style.display = 'grid';
         document.getElementById('statsMensaje').style.display = 'none';
         document.getElementById('btnDl').disabled = false;
+        document.getElementById('btnCobalt').disabled = false;
 
-        setEstado('✓ Video cargado. Pulsa "Descargar MP3" para iniciar.', 'exito');
+        setEstado('✓ Video cargado. Presiona un botón para descargar.', 'exito');
     }
 
     async function descargarDirecto() {
@@ -287,132 +271,80 @@
         }
 
         var urlYT = 'https://www.youtube.com/watch?v=' + vidId;
-        var bitrate = document.getElementById('calidad').value;
         var titulo = document.getElementById('infoTitulo').innerText || 'musica';
 
-        setEstado('<span class="spinner"></span>Conectando con servidor de descarga...', 'procesando');
-        mostrarProgreso(10);
-        document.getElementById('btnDl').disabled = true;
-        document.getElementById('linkDescarga').style.display = 'none';
-        document.getElementById('notaApi').style.display = 'none';
+        setEstado('<span class="spinner"></span>Iniciando procesador de audio...', 'procesando');
+        mostrarProgreso(20);
+        deshabilitarBotones(true);
 
-        // === INTENTO 1: cobalt.tools (API pública, sin clave) ===
+        var payload = {
+            url: urlYT,
+            downloadMode: "audio",
+            audioFormat: "mp3",
+            youtubeVideoCodec: "h264"
+        };
+
         try {
-            mostrarProgreso(25);
-            setEstado('<span class="spinner"></span>Obteniendo enlace de descarga...', 'procesando');
-
+            mostrarProgreso(50);
+            
             var resp = await fetch('https://api.cobalt.tools/', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({
-                    url: urlYT,
-                    audioFormat: 'mp3',
-                    audioBitrate: bitrate,
-                    downloadMode: 'audio'
-                })
+                body: JSON.stringify(payload)
             });
 
-            if (resp.ok) {
-                var data = await resp.json();
-                mostrarProgreso(60);
+            if (!resp.ok) throw new Error('Servidor devolvió estado ' + resp.status);
 
-                if (data.status === 'tunnel' || data.status === 'redirect' || data.url) {
-                    var dlUrl = data.url || data.urls;
-                    mostrarProgreso(85);
-                    setEstado('<span class="spinner"></span>Descargando archivo...', 'procesando');
+            var data = await resp.json();
 
-                    // Descargar el blob directamente (sin abrir nueva pestaña)
-                    var blobResp = await fetch(dlUrl);
-                    var blob = await blobResp.blob();
-                    mostrarProgreso(100);
-
-                    var blobUrl = URL.createObjectURL(blob);
-                    var a = document.createElement('a');
-                    var nombreLimpio = titulo.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s_\-]/g, '').trim().substring(0, 60);
-                    a.href = blobUrl;
-                    a.download = (nombreLimpio || 'musica') + '.mp3';
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    setTimeout(function() { URL.revokeObjectURL(blobUrl); }, 5000);
-
-                    mostrarProgreso(null);
-                    setEstado('✅ ¡Descarga completa! Revisa tu carpeta de Descargas.', 'exito');
-                    document.getElementById('btnDl').disabled = false;
-                    return;
-                }
+            if (data.url) {
+                mostrarProgreso(80);
+                setEstado('<span class="spinner"></span>Descargando archivo...', 'procesando');
+                
+                ejecutarDescarga(data.url, titulo + '.mp3');
+                
+                mostrarProgreso(100);
+                setTimeout(function() { mostrarProgreso(null); }, 1500);
+                setEstado('✅ ¡Descarga iniciada con éxito!', 'exito');
+                deshabilitarBotones(false);
+                return;
+            } else {
+                throw new Error('Respuesta sin URL');
             }
-        } catch(e1) {
-            console.warn('cobalt.tools falló:', e1.message);
+
+        } catch (err) {
+            console.warn('Fallo en la API directa:', err);
+            mostrarProgreso(null);
+            deshabilitarBotones(false);
+
+            setEstado('⚠️ Redirigiendo a servidor seguro...', 'warning');
+            setTimeout(function() {
+                window.location.href = 'https://cobalt.tools/#' + encodeURIComponent(urlYT);
+            }, 1000);
         }
+    }
 
-        // === INTENTO 2: yt-dlp-api alternativa ===
-        try {
-            mostrarProgreso(30);
-            setEstado('<span class="spinner"></span>Intentando servidor alternativo...', 'procesando');
+    function descargarConCobalt() {
+        if (!vidId) return;
+        var urlYT = 'https://www.youtube.com/watch?v=' + vidId;
+        window.location.href = 'https://cobalt.tools/#' + encodeURIComponent(urlYT);
+    }
 
-            var resp2 = await fetch('https://co.wuk.sh/api/json', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify({
-                    url: urlYT,
-                    aFormat: 'mp3',
-                    isAudioOnly: true,
-                    audioBitrate: bitrate
-                })
-            });
+    function ejecutarDescarga(url, nombreArchivo) {
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = nombreArchivo.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s_\-]/g, '').trim().substring(0, 60);
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    }
 
-            if (resp2.ok) {
-                var data2 = await resp2.json();
-                if (data2.url) {
-                    mostrarProgreso(70);
-                    var blobResp2 = await fetch(data2.url);
-                    var blob2 = await blobResp2.blob();
-                    mostrarProgreso(100);
-
-                    var blobUrl2 = URL.createObjectURL(blob2);
-                    var a2 = document.createElement('a');
-                    a2.href = blobUrl2;
-                    a2.download = titulo.substring(0, 60) + '.mp3';
-                    document.body.appendChild(a2);
-                    a2.click();
-                    document.body.removeChild(a2);
-                    setTimeout(function() { URL.revokeObjectURL(blobUrl2); }, 5000);
-
-                    mostrarProgreso(null);
-                    setEstado('✅ ¡Descarga completa! Revisa tu carpeta de Descargas.', 'exito');
-                    document.getElementById('btnDl').disabled = false;
-                    return;
-                }
-            }
-        } catch(e2) {
-            console.warn('Alternativa 2 falló:', e2.message);
-        }
-
-        // === FALLBACK: Mostrar botones de servicio confiable ===
-        mostrarProgreso(null);
-        document.getElementById('btnDl').disabled = false;
-        document.getElementById('notaApi').style.display = 'block';
-
-        // Preparar enlace directo que se abre aquí mismo
-        var urlCobalt = 'https://cobalt.tools/#' + encodeURIComponent(urlYT);
-        var linkEl = document.getElementById('linkDescarga');
-        linkEl.href = urlCobalt;
-        linkEl.removeAttribute('download');
-        linkEl.onclick = function(e) {
-            e.preventDefault();
-            window.location.href = urlCobalt; // misma pestaña
-        };
-        linkEl.style.display = 'block';
-        linkEl.innerText = '▶ Abrir cobalt.tools (mejor alternativa gratuita)';
-
-        setEstado('⚠️ Las APIs directas están limitadas por CORS. Usa el enlace de abajo — es la mejor alternativa gratuita.', 'warning');
+    function deshabilitarBotones(estado) {
+        document.getElementById('btnDl').disabled = estado;
+        document.getElementById('btnCobalt').disabled = estado;
     }
 </script>
 </body>
