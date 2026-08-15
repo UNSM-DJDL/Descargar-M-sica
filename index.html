@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Descargador MP3 YouTube Directo</title>
+    <title>Descargador MP3 Multiserver</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
@@ -19,19 +19,24 @@
         h2 { font-size: 1.1em; margin-bottom: 15px; border-bottom: 2px solid #2a5298; padding-bottom: 8px; color: #1e3c72; }
         .input-group { margin-bottom: 12px; }
         .input-group label { display: block; font-weight: 600; font-size: 0.85em; margin-bottom: 4px; color: #333; }
-        input[type="text"] { width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 6px; font-size: 0.9em; }
-        input[type="text"]:focus { outline: none; border-color: #2a5298; }
+        input[type="text"], select { width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 6px; font-size: 0.9em; }
+        input[type="text"]:focus, select:focus { outline: none; border-color: #2a5298; }
         .estado { font-size: 0.9em; text-align: center; padding: 10px; border-radius: 6px; background: #e3f2fd; color: #1565c0; margin: 12px 0; min-height: 42px; display: flex; align-items: center; justify-content: center; }
         .estado.exito { background: #c8e6c9; color: #2e7d32; }
         .estado.error { background: #ffcdd2; color: #c62828; }
         .estado.procesando { background: #e8eaf6; color: #283593; }
+        
+        /* BOTONES DEL PANEL IZQUIERDO */
         .btn { display: block; width: 100%; color: white; padding: 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; margin-bottom: 8px; font-size: 0.95em; text-align: center; }
         .btn-primary { background: #1e3c72; }
         .btn-primary:hover { background: #2a5298; }
-        .btn-dl { background: #00b894; display: none; }
-        .btn-dl:hover { background: #00a884; }
+        .btn-servidor1 { background: #00b894; display: none; }
+        .btn-servidor1:hover { background: #00a884; }
+        .btn-servidor2 { background: #0984e3; display: none; }
+        .btn-servidor2:hover { background: #076bba; }
         .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        .badge { background: #e8f5e9; color: #2e7d32; font-size: 0.8em; padding: 6px 10px; border-radius: 4px; border: 1px solid #a5d6a7; margin-bottom: 12px; display: block; text-align: center; }
+
+        .opciones-box { background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 12px; margin: 12px 0; }
         .thumb-img { width: 100%; border-radius: 6px; margin-bottom: 10px; border: 1px solid #ddd; }
         .info-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #eee; font-size: 0.85em; }
         .info-lbl { font-weight: 600; color: #1e3c72; }
@@ -46,13 +51,13 @@
 <body>
 <div class="container">
     <div class="header">
-        <h1>🎵 Descargador MP3 en la misma Pestaña</h1>
+        <h1>🎵 Descargador MP3 YouTube</h1>
     </div>
 
     <div class="main-container">
-        <!-- PANEL IZQUIERDO -->
+        <!-- PANEL IZQUIERDO (OPCIONES DE DESCARGA Y SERVIDORES) -->
         <div class="panel">
-            <h2>📥 Cargar y Convertir</h2>
+            <h2>📥 Cargar y Opciones de Descarga</h2>
 
             <div class="input-group">
                 <label>URL de YouTube:</label>
@@ -61,14 +66,29 @@
 
             <button class="btn btn-primary" id="btnCargar" onclick="cargarVideo()">🔍 Cargar Video</button>
 
-            <span class="badge">🔊 Calidad Audio: 192-320 kbps (Nativa YouTube)</span>
+            <!-- OPCIONES ADICIONALES EN EL PANEL IZQUIERDO -->
+            <div class="opciones-box">
+                <div class="input-group">
+                    <label>Calidad preferida:</label>
+                    <select id="calidadAudio">
+                        <option value="320">MP3 - 320 kbps (Alta Calidad)</option>
+                        <option value="192" selected>MP3 - 192 kbps (Recomendada)</option>
+                        <option value="128">MP3 - 128 kbps (Normal)</option>
+                    </select>
+                </div>
+            </div>
 
             <div class="estado" id="estado">
                 ✓ Ingresa un enlace para comenzar.
             </div>
 
-            <button id="btnDescarga" class="btn btn-dl" onclick="ejecutarDescargaBlob()">
-                ⬇️ DESCARGAR MP3 AQUÍ
+            <!-- SERVIDORES DE DESCARGA -->
+            <button id="btnSrv1" class="btn btn-servidor1" onclick="descargarServidor1()">
+                ⚡ OBTENER MP3 (Servidor 1 - Rápido)
+            </button>
+
+            <button id="btnSrv2" class="btn btn-servidor2" onclick="descargarServidor2()">
+                🔄 OBTENER MP3 (Servidor 2 - Alternativo)
             </button>
         </div>
 
@@ -118,8 +138,11 @@
 
     async function cargarVideo() {
         var url = document.getElementById('urlVideo').value.trim();
-        var btnDL = document.getElementById('btnDescarga');
-        btnDL.style.display = 'none';
+        var srv1 = document.getElementById('btnSrv1');
+        var srv2 = document.getElementById('btnSrv2');
+        
+        srv1.style.display = 'none';
+        srv2.style.display = 'none';
 
         if (!url) {
             setEstado('❌ Ingresa una URL de YouTube.', 'error');
@@ -132,7 +155,7 @@
         }
         vidId = id;
 
-        setEstado('<span class="spinner"></span>Obteniendo datos del video...', 'procesando');
+        setEstado('<span class="spinner"></span>Cargando información...', 'procesando');
 
         document.getElementById('thumb').src = 'https://img.youtube.com/vi/' + id + '/hqdefault.jpg';
 
@@ -147,45 +170,35 @@
         }
 
         document.getElementById('previewWrap').classList.add('activo');
-        btnDL.style.display = 'block';
-        setEstado('✅ Listo. Haz clic en el botón verde para guardar el archivo.', 'exito');
+        srv1.style.display = 'block';
+        srv2.style.display = 'block';
+        setEstado('✅ Selecciona un servidor para iniciar la descarga.', 'exito');
     }
 
-    async function ejecutarDescargaBlob() {
+    function descargarServidor1() {
         if (!vidId) return;
-
-        var btnDL = document.getElementById('btnDescarga');
-        var btnCargar = document.getElementById('btnCargar');
+        setEstado('<span class="spinner"></span>Iniciando Servidor 1...', 'procesando');
         
-        btnDL.disabled = true;
-        btnCargar.disabled = true;
-        setEstado('<span class="spinner"></span>Procesando y guardando audio en disco...', 'procesando');
-
-        try {
-            // Se utiliza un proxy directo que devuelve el flujo de bytes de audio directamente
-            var streamUrl = 'https://api.vevioz.com/api/button/mp3/' + vidId;
-            
-            // Creamos una descarga mediante un iframe temporal silencioso dentro de la misma página
-            var frame = document.getElementById('hiddenDownloader');
-            if (!frame) {
-                frame = document.createElement('iframe');
-                frame.id = 'hiddenDownloader';
-                frame.style.display = 'none';
-                document.body.appendChild(frame);
-            }
-            
-            // Forzar navegación del frame interno sin redireccionar la pestaña principal
-            frame.src = streamUrl;
-
-            setEstado('✅ ¡Descarga iniciada! Revisa tu carpeta de descargas.', 'exito');
-        } catch (err) {
-            setEstado('❌ Error al procesar la descarga.', 'error');
-        } finally {
-            setTimeout(function() {
-                btnDL.disabled = false;
-                btnCargar.disabled = false;
-            }, 3000);
+        var frame = document.getElementById('dlFrame');
+        if (!frame) {
+            frame = document.createElement('iframe');
+            frame.id = 'dlFrame';
+            frame.style.display = 'none';
+            document.body.appendChild(frame);
         }
+        
+        var calidad = document.getElementById('calidadAudio').value;
+        frame.src = 'https://loader.to/api/button/?url=https://www.youtube.com/watch?v=' + vidId + '&f=mp3&b=' + calidad;
+        setEstado('✅ Procesando audio en Servidor 1...', 'exito');
+    }
+
+    function descargarServidor2() {
+        if (!vidId) return;
+        setEstado('<span class="spinner"></span>Iniciando Servidor 2...', 'procesando');
+        
+        var cleanUrl = 'https://www.youtube.com/watch?v=' + vidId;
+        window.open('https://ytmp3.nu/v2/' + vidId, '_blank');
+        setEstado('✅ Petición enviada al Servidor 2.', 'exito');
     }
 </script>
 </body>
