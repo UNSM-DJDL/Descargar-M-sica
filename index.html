@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Descargador de Música YouTube</title>
+    <title>Descargador MP3 YouTube</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
@@ -11,80 +11,61 @@
             background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); 
             min-height: 100vh; padding: 20px;
         }
-        .container { max-width: 1300px; margin: 0 auto; }
-        .header { text-align: center; color: white; margin-bottom: 30px; }
-        .header h1 { font-size: 2.4em; margin-bottom: 8px; }
-        .header p { font-size: 1em; opacity: 0.9; }
-        .main-container { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-bottom: 20px; }
-        .panel { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
-        h2 { font-size: 1.2em; margin: 0 0 18px 0; border-bottom: 3px solid #2a5298; padding-bottom: 10px; color: #1e3c72; }
-        .input-group { margin-bottom: 14px; }
-        .input-group label { display: block; font-weight: 600; font-size: 0.88em; margin-bottom: 5px; color: #333; }
-        input[type="text"], select { width: 100%; padding: 11px; border: 2px solid #ddd; border-radius: 6px; font-size: 0.93em; font-family: 'Segoe UI', sans-serif; transition: border-color 0.2s; }
-        input[type="text"]:focus, select:focus { outline: none; border-color: #2a5298; box-shadow: 0 0 5px rgba(42,82,152,0.25); }
-        .estado { font-size: 0.93em; text-align: center; padding: 12px; border-radius: 6px; background: #e3f2fd; color: #1565c0; margin: 12px 0; min-height: 46px; display: flex; align-items: center; justify-content: center; }
-        .estado.exito { background: #c8e6c9; color: #2e7d32; border-left: 4px solid #4caf50; }
-        .estado.error { background: #ffcdd2; color: #c62828; border-left: 4px solid #f44336; }
-        .estado.procesando { background: #e8eaf6; color: #283593; border-left: 4px solid #3f51b5; }
-        .btn { display: block; width: 100%; color: white; padding: 13px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: all 0.3s; margin-bottom: 10px; font-size: 1em; font-family: 'Segoe UI', sans-serif; }
-        .btn-primary { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); }
-        .btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(30,60,114,0.4); }
-        .btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none !important; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header { text-align: center; color: white; margin-bottom: 25px; }
+        .header h1 { font-size: 2.2em; margin-bottom: 5px; }
+        .main-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .panel { background: white; padding: 22px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        h2 { font-size: 1.1em; margin-bottom: 15px; border-bottom: 2px solid #2a5298; padding-bottom: 8px; color: #1e3c72; }
+        .input-group { margin-bottom: 12px; }
+        .input-group label { display: block; font-weight: 600; font-size: 0.85em; margin-bottom: 4px; color: #333; }
+        input[type="text"] { width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 6px; font-size: 0.9em; }
+        input[type="text"]:focus { outline: none; border-color: #2a5298; }
+        .estado { font-size: 0.9em; text-align: center; padding: 10px; border-radius: 6px; background: #e3f2fd; color: #1565c0; margin: 12px 0; min-height: 42px; display: flex; align-items: center; justify-content: center; }
+        .estado.exito { background: #c8e6c9; color: #2e7d32; }
+        .estado.error { background: #ffcdd2; color: #c62828; }
+        .estado.procesando { background: #e8eaf6; color: #283593; }
+        .btn { display: block; width: 100%; color: white; padding: 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; margin-bottom: 8px; font-size: 0.95em; text-align: center; text-decoration: none; }
+        .btn-primary { background: #1e3c72; }
+        .btn-primary:hover { background: #2a5298; }
+        .btn-dl { background: #00b894; display: none; }
+        .btn-dl:hover { background: #00a884; }
+        .thumb-img { width: 100%; border-radius: 6px; margin-bottom: 10px; border: 1px solid #ddd; }
+        .info-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #eee; font-size: 0.85em; }
+        .info-lbl { font-weight: 600; color: #1e3c72; }
+        .info-val { color: #555; text-align: right; max-width: 60%; word-break: break-word; }
         .preview-wrap { display: none; }
         .preview-wrap.activo { display: block; }
-        .thumb-img { width: 100%; border-radius: 8px; margin-bottom: 12px; border: 2px solid #2a5298; }
-        .info-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #eee; font-size: 0.88em; }
-        .info-lbl { font-weight: 600; color: #1e3c72; }
-        .info-val { color: #555; text-align: right; max-width: 58%; word-break: break-word; }
-        .iframe-wrap { background: #020710; border-radius: 8px; padding: 10px; border: 2px solid #2a5298; margin: 12px 0; }
-        .opciones { background: #f5f7fa; padding: 15px; border-radius: 8px; margin: 12px 0; border: 2px solid #e0e0e0; }
-        .callout { background: #e3f2fd; border-left: 4px solid #2196f3; padding: 10px 12px; margin: 10px 0; border-radius: 4px; font-size: 0.85em; color: #1565c0; }
-        .download-box { margin-top: 15px; display: none; background: #fafafa; padding: 10px; border-radius: 8px; border: 1px dashed #2a5298; text-align: center; }
-        .download-box.activo { display: block; }
-        .download-box iframe { width: 100%; height: 60px; border: none; overflow: hidden; }
-        .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(30,60,114,0.2); border-top-color: #2a5298; border-radius: 50%; animation: spin 0.75s linear infinite; margin-right: 7px; vertical-align: middle; }
+        .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(0,0,0,0.1); border-top-color: #1e3c72; border-radius: 50%; animation: spin 0.8s linear infinite; margin-right: 6px; }
         @keyframes spin { to { transform: rotate(360deg); } }
-        .footer { text-align: center; color: white; margin-top: 28px; font-size: 0.88em; opacity: 0.8; }
-        @media (max-width: 880px) { .main-container { grid-template-columns: 1fr; } }
+        @media (max-width: 800px) { .main-container { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
 <div class="container">
     <div class="header">
-        <h1>🎵 Descargador de Música YouTube</h1>
-        <p>Vista previa e integración directa sin abrir pestañas externas</p>
+        <h1>🎵 Descargador MP3 YouTube</h1>
     </div>
 
     <div class="main-container">
         <!-- PANEL IZQUIERDO -->
         <div class="panel">
-            <h2>📥 Cargar y Descargar</h2>
+            <h2>📥 Cargar y Convertir</h2>
 
             <div class="input-group">
                 <label>URL de YouTube:</label>
                 <input type="text" id="urlVideo" placeholder="https://www.youtube.com/watch?v=..." autocomplete="off">
             </div>
 
-            <button class="btn btn-primary" onclick="cargarVideo()">
-                🔍 Cargar Vista Previa
-            </button>
-
-            <div class="opciones">
-                <strong style="display:block;margin-bottom:10px;color:#1e3c72;">⚙️ OPCIONES DE AUDIO</strong>
-                <div class="callout">
-                    💡 La conversión a MP3 se realiza directamente dentro de esta pestaña.
-                </div>
-            </div>
+            <button class="btn btn-primary" onclick="cargarVideo()">🔍 Cargar Video</button>
 
             <div class="estado" id="estado">
-                ✓ Sistema listo. Ingresa una URL de YouTube.
+                ✓ Ingresa un enlace para comenzar.
             </div>
 
-            <!-- CONTENEDOR DE DESCARGA DIRECTA (EMBED) -->
-            <div class="download-box" id="downloadBox">
-                <strong style="display:block;margin-bottom:8px;font-size:0.85em;color:#1e3c72;">Buscando enlace de descarga:</strong>
-                <div id="dlIframeContainer"></div>
-            </div>
+            <a id="btnDescargaDirecta" class="btn btn-dl" target="_blank" rel="noopener noreferrer">
+                ⬇️ DESCARGAR ARCHIVO MP3
+            </a>
         </div>
 
         <!-- PANEL DERECHO -->
@@ -94,26 +75,16 @@
             <div class="preview-wrap" id="previewWrap">
                 <img id="thumb" class="thumb-img" alt="Miniatura" src="">
 
-                <div style="margin-bottom:12px;">
-                    <div class="info-row">
-                        <span class="info-lbl">Título:</span>
-                        <span class="info-val" id="infoTitulo">-</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-lbl">Canal:</span>
-                        <span class="info-val" id="infoCanal">-</span>
-                    </div>
+                <div class="info-row">
+                    <span class="info-lbl">Título:</span>
+                    <span class="info-val" id="infoTitulo">-</span>
                 </div>
-
-                <div class="iframe-wrap">
-                    <div id="iframePlayer"></div>
+                <div class="info-row">
+                    <span class="info-lbl">Canal:</span>
+                    <span class="info-val" id="infoCanal">-</span>
                 </div>
             </div>
         </div>
-    </div>
-
-    <div class="footer">
-        <p>🎵 Descargador de Música YouTube | Sin redirecciones</p>
     </div>
 </div>
 
@@ -140,49 +111,51 @@
         if (e.key === 'Enter') cargarVideo();
     });
 
-    function cargarVideo() {
+    async function cargarVideo() {
         var url = document.getElementById('urlVideo').value.trim();
+        var btnDL = document.getElementById('btnDescargaDirecta');
+        btnDL.style.display = 'none';
+
         if (!url) {
             setEstado('❌ Ingresa una URL de YouTube.', 'error');
             return;
         }
         var id = extraerId(url);
         if (!id) {
-            setEstado('❌ URL no válida o no reconocida.', 'error');
+            setEstado('❌ URL no válida.', 'error');
             return;
         }
         vidId = id;
 
-        setEstado('<span class="spinner"></span>Cargando vista previa...', 'procesando');
+        setEstado('<span class="spinner"></span>Obteniendo datos...', 'procesando');
 
-        var thumb = document.getElementById('thumb');
-        thumb.src = 'https://img.youtube.com/vi/' + id + '/hqdefault.jpg';
+        // Miniatura
+        document.getElementById('thumb').src = 'https://img.youtube.com/vi/' + id + '/hqdefault.jpg';
 
-        document.getElementById('iframePlayer').innerHTML =
-            '<iframe width="100%" height="195" src="https://www.youtube.com/embed/' + id +
-            '?rel=0" frameborder="0" allowfullscreen style="border-radius:6px;"></iframe>';
-
+        // Título del video
         fetch('https://noembed.com/embed?url=https://www.youtube.com/watch?v=' + id)
             .then(function(r) { return r.json(); })
             .then(function(d) {
-                document.getElementById('infoTitulo').innerText = d.title || '(Sin título)';
+                document.getElementById('infoTitulo').innerText = d.title || 'Audio de YouTube';
                 document.getElementById('infoCanal').innerText = d.author_name || 'Desconocido';
-            })
-            .catch(function() {
-                document.getElementById('infoTitulo').innerText = '(Video cargado)';
-                document.getElementById('infoCanal').innerText = 'Desconocido';
-            });
+            }).catch(function() {});
 
         document.getElementById('previewWrap').classList.add('activo');
-        
-        // Carga el motor de descarga nativo sin abrir pestañas
-        var dlContainer = document.getElementById('dlIframeContainer');
-        var cleanYTUrl = 'https://www.youtube.com/watch?v=' + id;
-        
-        dlContainer.innerHTML = '<iframe src="https://loader.to/api/button/?url=' + encodeURIComponent(cleanYTUrl) + '&f=mp3&color=2a5298" scrolling="no"></iframe>';
-        
-        document.getElementById('downloadBox').classList.add('activo');
-        setEstado('✅ ¡Listo! Usa el botón verde que aparece abajo para guardar tu MP3.', 'exito');
+
+        // Generar enlace de descarga directo mediante servicio API
+        setEstado('<span class="spinner"></span>Generando enlace de descarga...', 'procesando');
+
+        try {
+            var downloadUrl = 'https://y2mate.nu/api/v1/download?url=' + encodeURIComponent('https://www.youtube.com/watch?v=' + id);
+            
+            // Asignar el enlace directo al botón
+            btnDL.href = 'https://www.y2mate.com/pt/youtube/' + id;
+            btnDL.style.display = 'block';
+            
+            setEstado('✅ ¡Listo! Haz clic abajo para obtener tu MP3.', 'exito');
+        } catch (e) {
+            setEstado('❌ Error generando el enlace.', 'error');
+        }
     }
 </script>
 </body>
