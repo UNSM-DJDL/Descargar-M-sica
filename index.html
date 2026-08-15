@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -32,8 +33,6 @@
         .btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(30,60,114,0.4); }
         .btn-dl { background: linear-gradient(135deg, #00b894 0%, #00cec9 100%); font-size: 1.05em; }
         .btn-dl:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(0,184,148,0.4); }
-        .btn-cobalt { background: linear-gradient(135deg, #7941a5 0%, #5a2882 100%); font-size: 1em; }
-        .btn-cobalt:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(121,65,165,0.4); }
         .btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none !important; }
         .preview-wrap { display: none; }
         .preview-wrap.activo { display: block; }
@@ -52,7 +51,7 @@
         .stat-val { font-size: 1.05em; color: #1e3c72; font-weight: bold; margin-top: 3px; }
         .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(30,60,114,0.2); border-top-color: #2a5298; border-radius: 50%; animation: spin 0.75s linear infinite; margin-right: 7px; vertical-align: middle; }
         @keyframes spin { to { transform: rotate(360deg); } }
-        .dl-btn-directo { display: block; width: 100%; padding: 14px; background: linear-gradient(135deg, #6c5ce7, #a29bfe); color: white; border: none; border-radius: 8px; font-size: 1em; font-weight: bold; cursor: pointer; margin-top: 8px; transition: all 0.3s; font-family: 'Segoe UI', sans-serif; text-align: center; text-decoration: none; }
+        .dl-btn-directo { display: block; width: 100%; padding: 16px; background: linear-gradient(135deg, #6c5ce7, #a29bfe); color: white; border: none; border-radius: 8px; font-size: 1.1em; font-weight: bold; cursor: pointer; margin-top: 8px; transition: all 0.3s; font-family: 'Segoe UI', sans-serif; text-align: center; text-decoration: none; }
         .dl-btn-directo:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(108,92,231,0.45); }
         .nota-api { background: #fff3e0; border-left: 4px solid #ff9800; padding: 12px; border-radius: 6px; margin: 10px 0; font-size: 0.85em; color: #e65100; }
         .footer { text-align: center; color: white; margin-top: 28px; font-size: 0.88em; opacity: 0.8; }
@@ -106,22 +105,19 @@
                 ✓ Sistema listo. Ingresa una URL de YouTube.
             </div>
 
-            <!-- BOTONES DE DESCARGA -->
+            <!-- BOTÓN DE DESCARGA DIRECTO -->
             <button class="btn btn-dl" id="btnDl" onclick="descargarDirecto()" disabled>
-                ⬇️ Descarga en la misma pestaña
+                ⬇️ Descargar MP3 (en esta pestaña)
             </button>
 
-            <button class="btn btn-cobalt" id="btnCobalt" onclick="descargarConCobalt()" disabled>
-                ⚡ Descargar con Cobalt (misma pestaña)
-            </button>
-
-            <!-- ENLACE CAÍDA / FALLBACK -->
+            <!-- ENLACE DIRECTO como fallback -->
             <a id="linkDescarga" style="display:none;" class="dl-btn-directo" href="#" download>
                 💾 Guardar archivo MP3
             </a>
 
             <div class="nota-api" id="notaApi" style="display:none;">
-                ⚠️ Si la descarga automatizada por API es bloqueada por tu navegador, haz clic en el botón de abajo para ir a Cobalt en esta misma pestaña.
+                ⚠️ La API de descarga directa requiere CORS. Si el botón no funciona, 
+                usa el enlace alternativo abajo — se abre <strong>en esta misma pestaña</strong>.
             </div>
         </div>
 
@@ -185,7 +181,7 @@
 
     <div class="footer">
         <p>🎵 Descargador de Música YouTube | AAC → MP3 | 192 kbps Óptimo</p>
-        <p>Sin pestañas adicionales</p>
+        <p>Powered by cobalt.tools API · Sin pestañas adicionales</p>
     </div>
 </div>
 
@@ -280,12 +276,10 @@
         document.getElementById('statsGrid').style.display = 'grid';
         document.getElementById('statsMensaje').style.display = 'none';
         document.getElementById('btnDl').disabled = false;
-        document.getElementById('btnCobalt').disabled = false;
 
-        setEstado('✓ Video cargado. Selecciona tu método de descarga preferido.', 'exito');
+        setEstado('✓ Video cargado. Pulsa "Descargar MP3" para iniciar.', 'exito');
     }
 
-    // === OPCIÓN 1: DESCARGA DIRECTA (SIN CAMBIAR DE PESTAÑA) ===
     async function descargarDirecto() {
         if (!vidId) {
             setEstado('❌ Carga primero un video.', 'error');
@@ -296,93 +290,129 @@
         var bitrate = document.getElementById('calidad').value;
         var titulo = document.getElementById('infoTitulo').innerText || 'musica';
 
-        setEstado('<span class="spinner"></span>Iniciando motor de descarga...', 'procesando');
-        mostrarProgreso(15);
-        deshabilitarBotones(true);
+        setEstado('<span class="spinner"></span>Conectando con servidor de descarga...', 'procesando');
+        mostrarProgreso(10);
+        document.getElementById('btnDl').disabled = true;
+        document.getElementById('linkDescarga').style.display = 'none';
+        document.getElementById('notaApi').style.display = 'none';
 
-        // Intentos usando diferentes servicios backend
-        var apis = [
-            {
-                url: 'https://api.cobalt.tools/',
-                body: { url: urlYT, downloadMode: 'audio', audioFormat: 'mp3', audioBitrate: bitrate }
-            },
-            {
-                url: 'https://co.wuk.sh/api/json',
-                body: { url: urlYT, isAudioOnly: true, aFormat: 'mp3', audioBitrate: bitrate }
-            }
-        ];
+        // === INTENTO 1: cobalt.tools (API pública, sin clave) ===
+        try {
+            mostrarProgreso(25);
+            setEstado('<span class="spinner"></span>Obteniendo enlace de descarga...', 'procesando');
 
-        for (var i = 0; i < apis.length; i++) {
-            try {
-                mostrarProgreso(30 + (i * 20));
-                setEstado('<span class="spinner"></span>Procesando audio (Servidor ' + (i+1) + ')...', 'procesando');
+            var resp = await fetch('https://api.cobalt.tools/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    url: urlYT,
+                    audioFormat: 'mp3',
+                    audioBitrate: bitrate,
+                    downloadMode: 'audio'
+                })
+            });
 
-                var resp = await fetch(apis[i].url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                    body: JSON.stringify(apis[i].body)
-                });
+            if (resp.ok) {
+                var data = await resp.json();
+                mostrarProgreso(60);
 
-                if (resp.ok) {
-                    var data = await resp.json();
-                    var fileUrl = data.url || data.urls;
+                if (data.status === 'tunnel' || data.status === 'redirect' || data.url) {
+                    var dlUrl = data.url || data.urls;
+                    mostrarProgreso(85);
+                    setEstado('<span class="spinner"></span>Descargando archivo...', 'procesando');
 
-                    if (fileUrl) {
-                        mostrarProgreso(75);
-                        setEstado('<span class="spinner"></span>Transfiriendo archivo...', 'procesando');
+                    // Descargar el blob directamente (sin abrir nueva pestaña)
+                    var blobResp = await fetch(dlUrl);
+                    var blob = await blobResp.blob();
+                    mostrarProgreso(100);
 
-                        // Descargar como blob si es posible o forzar enlace
-                        try {
-                            var bResp = await fetch(fileUrl);
-                            var blob = await bResp.blob();
-                            var blobUrl = URL.createObjectURL(blob);
-                            ejecutarDescarga(blobUrl, titulo + '.mp3');
-                        } catch (eBlob) {
-                            // Fallback a enlace directo si la API no permite Blob
-                            ejecutarDescarga(fileUrl, titulo + '.mp3');
-                        }
+                    var blobUrl = URL.createObjectURL(blob);
+                    var a = document.createElement('a');
+                    var nombreLimpio = titulo.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s_\-]/g, '').trim().substring(0, 60);
+                    a.href = blobUrl;
+                    a.download = (nombreLimpio || 'musica') + '.mp3';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    setTimeout(function() { URL.revokeObjectURL(blobUrl); }, 5000);
 
-                        mostrarProgreso(100);
-                        setTimeout(function() { mostrarProgreso(null); }, 1500);
-                        setEstado('✅ ¡Descarga completada con éxito!', 'exito');
-                        deshabilitarBotones(false);
-                        return;
-                    }
+                    mostrarProgreso(null);
+                    setEstado('✅ ¡Descarga completa! Revisa tu carpeta de Descargas.', 'exito');
+                    document.getElementById('btnDl').disabled = false;
+                    return;
                 }
-            } catch (err) {
-                console.warn('API ' + (i+1) + ' no disponible:', err);
             }
+        } catch(e1) {
+            console.warn('cobalt.tools falló:', e1.message);
         }
 
-        // Si la descarga automática directa falla
+        // === INTENTO 2: yt-dlp-api alternativa ===
+        try {
+            mostrarProgreso(30);
+            setEstado('<span class="spinner"></span>Intentando servidor alternativo...', 'procesando');
+
+            var resp2 = await fetch('https://co.wuk.sh/api/json', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    url: urlYT,
+                    aFormat: 'mp3',
+                    isAudioOnly: true,
+                    audioBitrate: bitrate
+                })
+            });
+
+            if (resp2.ok) {
+                var data2 = await resp2.json();
+                if (data2.url) {
+                    mostrarProgreso(70);
+                    var blobResp2 = await fetch(data2.url);
+                    var blob2 = await blobResp2.blob();
+                    mostrarProgreso(100);
+
+                    var blobUrl2 = URL.createObjectURL(blob2);
+                    var a2 = document.createElement('a');
+                    a2.href = blobUrl2;
+                    a2.download = titulo.substring(0, 60) + '.mp3';
+                    document.body.appendChild(a2);
+                    a2.click();
+                    document.body.removeChild(a2);
+                    setTimeout(function() { URL.revokeObjectURL(blobUrl2); }, 5000);
+
+                    mostrarProgreso(null);
+                    setEstado('✅ ¡Descarga completa! Revisa tu carpeta de Descargas.', 'exito');
+                    document.getElementById('btnDl').disabled = false;
+                    return;
+                }
+            }
+        } catch(e2) {
+            console.warn('Alternativa 2 falló:', e2.message);
+        }
+
+        // === FALLBACK: Mostrar botones de servicio confiable ===
         mostrarProgreso(null);
-        deshabilitarBotones(false);
-        setEstado('⚠️ El servidor automático no respondió. Usa la opción "Descargar con Cobalt".', 'warning');
-    }
+        document.getElementById('btnDl').disabled = false;
+        document.getElementById('notaApi').style.display = 'block';
 
-    // === OPCIÓN 2: DESCARGAR USANDO COBALT (EN LA MISMA PESTAÑA) ===
-    function descargarConCobalt() {
-        if (!vidId) {
-            setEstado('❌ Carga primero un video.', 'error');
-            return;
-        }
-        var urlYT = 'https://www.youtube.com/watch?v=' + vidId;
-        // Redirecciona a Cobalt en la MISMA pestaña
-        window.location.href = 'https://cobalt.tools/#' + encodeURIComponent(urlYT);
-    }
+        // Preparar enlace directo que se abre aquí mismo
+        var urlCobalt = 'https://cobalt.tools/#' + encodeURIComponent(urlYT);
+        var linkEl = document.getElementById('linkDescarga');
+        linkEl.href = urlCobalt;
+        linkEl.removeAttribute('download');
+        linkEl.onclick = function(e) {
+            e.preventDefault();
+            window.location.href = urlCobalt; // misma pestaña
+        };
+        linkEl.style.display = 'block';
+        linkEl.innerText = '▶ Abrir cobalt.tools (mejor alternativa gratuita)';
 
-    function ejecutarDescarga(url, nombreArchivo) {
-        var a = document.createElement('a');
-        a.href = url;
-        a.download = nombreArchivo.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s_\-]/g, '').trim().substring(0, 60);
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-    }
-
-    function deshabilitarBotones(estado) {
-        document.getElementById('btnDl').disabled = estado;
-        document.getElementById('btnCobalt').disabled = estado;
+        setEstado('⚠️ Las APIs directas están limitadas por CORS. Usa el enlace de abajo — es la mejor alternativa gratuita.', 'warning');
     }
 </script>
 </body>
